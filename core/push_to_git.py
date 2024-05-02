@@ -26,8 +26,12 @@ def push_to_github():
             ref=f'refs/heads/{branch_name}', sha=repo.get_branch(str(branch)).commit.sha)
 
     for file_path in files:
-        with open(file_path, 'r', encoding='utf-8') as file:
-            content = file.read()
+        try:
+            with open(file_path, 'r', encoding='utf-8') as file:
+                content = file.read()
+        except FileNotFoundError:
+            print(f"File {file_path} not found. Skipping.")
+            continue
 
         try:
             file_content = repo.get_contents(file_path, ref=branch_name)
