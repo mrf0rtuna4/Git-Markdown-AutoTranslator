@@ -28,10 +28,12 @@ def push_to_github():
     for file_path in files:
         with open(file_path, 'r', encoding='utf-8') as file:
             content = file.read()
+        last_commit_sha = repo.get_branch(branch_name).commit.sha
         repo.create_file(file_path, commit_message,
-                         content, branch=branch_name)
+                         content, branch=branch_name, sha=last_commit_sha)
 
     print('Files uploaded successfully.')
+
 
 
 push_to_github()
