@@ -2,6 +2,7 @@ from deep_translator import GoogleTranslator
 import re
 import os
 
+
 def read_readme():
     with open("README.md", "r", encoding="utf-8") as file:
         return file.read()
@@ -11,9 +12,10 @@ def update_localizations():
     langs = GoogleTranslator().get_supported_languages()
     readme_content = read_readme()
     selected_langs = os.getenv("LANGS")
+
     no_links_content = re.sub(r"\[([^\]]+)\]\([^\)]+\)", r"\1", readme_content)
 
-    languages = ['ru', 'fr', 'es']
+    languages = [lang.strip() for lang in selected_langs.split(",")]
     for lang in languages:
         translated_content = GoogleTranslator(
             source='auto', target=lang).translate(text=no_links_content)

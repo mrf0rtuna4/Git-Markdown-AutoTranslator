@@ -1,7 +1,7 @@
 name: Translate README
 on:
   schedule:
-    - cron: "0 */2124 * * *" 
+    - cron: "0 */2124 * * *"
   
   workflow_dispatch:
   
@@ -29,11 +29,12 @@ jobs:
       - name: Run translation
         env:
           GITHUB_TOKEN: ${{ secrets.GTK }}
-          LANGS: ["en", "es"]
+          LANGS: "en, es"
         run: python core/translator.py
 
       - name: Push to GitHub
         env:
           GITHUB_TOKEN: ${{ secrets.GTK }}
           USER: mrf0rtuna4/mrf0rtuna4
+          LANGS: "en, es"
         run: python core/push_to_git.py
