@@ -7,9 +7,9 @@ def push_to_github():
 
     g = Github(github_token)
 
-    repo = g.get_repo('username/repository')
+    repo = g.get_repo(str(user))
 
-    files = ['locales/ru.md', 'locales/fr.md', 'locales/es.md']
+    files = ['ru.md', 'fr.md', 'es.md']
     commit_message = 'Update translations'
     branch_name = 'translations'
 
@@ -22,5 +22,5 @@ def push_to_github():
 
     print('Files uploaded successfully.')
 
-if __name__ == '__main__':
-    push_to_github()
+
+push_to_github()
