@@ -37,4 +37,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GTK }}
           USER: mrf0rtuna4/Github-Readme-AutoTranslator
           LANGS: "en, fr"
+          BRANCH: master
         run: python core/push_to_git.py

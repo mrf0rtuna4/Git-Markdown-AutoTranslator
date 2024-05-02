@@ -7,7 +7,8 @@ from github import Auth
 def push_to_github():
     github_token = os.getenv('GITHUB_TOKEN')
     user = os.getenv('USER')
-    langs = os.getenv("LANGS")
+    langs = os.getenv('LANGS')
+    branch = os.getenv('BRANCH')
 
     auth = Auth.Token(github_token)
 
@@ -20,7 +21,7 @@ def push_to_github():
     branch_name = 'translations'
 
     repo.create_git_ref(
-        ref=f'refs/heads/{branch_name}', sha=repo.get_branch('main').commit.sha)
+        ref=f'refs/heads/{branch_name}', sha=repo.get_branch(str(branch)).commit.sha)
 
     for file_path in files:
         with open(file_path, 'r', encoding='utf-8') as file:
