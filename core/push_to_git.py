@@ -3,7 +3,6 @@ from github import Github
 from github import Auth
 
 
-
 def push_to_github():
     github_token = os.getenv('GITHUB_TOKEN')
     user = os.getenv('USER')
@@ -20,8 +19,11 @@ def push_to_github():
     commit_message = 'Update translations'
     branch_name = 'translations'
 
-    repo.create_git_ref(
-        ref=f'refs/heads/{branch_name}', sha=repo.get_branch(str(branch)).commit.sha)
+    try:
+        repo.get_branch(branch_name)
+    except Exception as e:
+        repo.create_git_ref(
+            ref=f'refs/heads/{branch_name}', sha=repo.get_branch(str(branch)).commit.sha)
 
     for file_path in files:
         with open(file_path, 'r', encoding='utf-8') as file:
