@@ -1,8 +1,13 @@
 name: Translate README
 on:
+  schedule:
+    - cron: "0 */2124 * * *" 
+  
+  workflow_dispatch:
+  
   push:
     branches:
-      - main
+    - master
 
 jobs:
   translate:
