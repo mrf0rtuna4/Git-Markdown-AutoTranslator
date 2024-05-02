@@ -17,12 +17,16 @@ def update_localizations():
 
     languages = [lang.strip() for lang in selected_langs.split(",")]
     for lang in languages:
-        translated_content = GoogleTranslator(
-            source='auto', target=lang).translate(text=no_links_content)
+        try:
+            translated_content = GoogleTranslator(
+                source='auto', target=lang).translate(text=no_links_content)
 
-        with open(f"{lang}.md", "w", encoding="utf-8") as file:
-            file.write(translated_content)
-        print(f"Localization for {lang} updated.")
+            with open(f"{lang}.md", "w", encoding="utf-8") as file:
+                file.write(translated_content)
+            print(f"Localization for {lang} updated.")
+        except Exception as e:
+            print(f"Failed to translate to {lang}: {str(e)}")
+
 
 
 update_localizations()
