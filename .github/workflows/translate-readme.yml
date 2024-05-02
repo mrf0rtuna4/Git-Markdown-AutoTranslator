@@ -29,13 +29,13 @@ jobs:
       - name: Run translation
         env:
           GITHUB_TOKEN: ${{ secrets.GTK }}
-          LANGS: "en, fr"
+          LANGS: "serbian, italian"
         run: python core/translator.py
 
       - name: Push to GitHub
         env:
           GITHUB_TOKEN: ${{ secrets.GTK }}
           USER: mrf0rtuna4/Github-Readme-AutoTranslator
-          LANGS: "en, fr"
+          LANGS: "serbian, italian"
           BRANCH: master
         run: python core/push_to_git.py
