@@ -1,5 +1,7 @@
 import os
 from github import Github
+from github import Auth
+
 
 
 def push_to_github():
@@ -7,7 +9,9 @@ def push_to_github():
     user = os.getenv('USER')
     langs = os.getenv("LANGS")
 
-    g = Github(github_token)
+    auth = Auth.Token(github_token)
+
+    g = Github(auth=auth)
 
     repo = g.get_repo(str(user))
 

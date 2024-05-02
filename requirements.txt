@@ -1,2 +1,2 @@
-github
+PyGithub
 deep_translator
