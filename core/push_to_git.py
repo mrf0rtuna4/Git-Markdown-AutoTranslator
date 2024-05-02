@@ -30,8 +30,9 @@ def push_to_github():
             content = file.read()
 
         try:
+            file_content = repo.get_contents(file_path, ref=branch_name)
             repo.update_file(file_path, commit_message,
-                             content, branch=branch_name)
+                             content, file_content.sha, branch=branch_name)
         except:
             repo.create_file(file_path, commit_message,
                              content, branch=branch_name)
