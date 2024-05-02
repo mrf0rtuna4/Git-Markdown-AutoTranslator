@@ -13,7 +13,7 @@ def update_localizations():
     readme_content = read_readme()
     selected_langs = os.getenv("LANGS")
 
-    no_links_content = re.sub(r"\[([^\]]+)\]\([^\)]+\)", r"\1", readme_content)
+    no_links_content = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r"\1", readme_content)
 
     languages = [lang.strip() for lang in selected_langs.split(",")]
     for lang in languages:
