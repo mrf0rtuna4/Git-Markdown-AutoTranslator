@@ -1,2 +1,2 @@
 github
-googletrans
+deep_translator
