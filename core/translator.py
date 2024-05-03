@@ -17,6 +17,10 @@ def update_localizations():
 
     languages = [lang.strip() for lang in selected_langs.split(",")]
     files = []
+
+    if not os.path.exists("dist"):
+        os.makedirs("dist")
+
     for lang in languages:
         try:
             translated_content = GoogleTranslator(
