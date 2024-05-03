@@ -23,12 +23,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GTK }}
           LANGS: 'serbian,italian,english'
 
-      - name: Create dist directory
-        run: mkdir dist
-
-      - name: Copy files to dist
-        run: cp -r $GITHUB_WORKSPACE/*.md dist/
-
       - name: Push to GitHub
         uses: crazy-max/ghaction-github-pages@v3.1.0
         with:
