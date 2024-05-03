@@ -22,11 +22,12 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GTK }}
           LANGS: 'serbian,italian,english'
+          DIST: 'dist'
 
       - name: Push to GitHub
         uses: crazy-max/ghaction-github-pages@v3.1.0
         with:
           target_branch: translations
-          build_dir: dist
+          build_dir: ${{ env.DIST }}
         env:
           GITHUB_TOKEN: ${{ secrets.GTK }}

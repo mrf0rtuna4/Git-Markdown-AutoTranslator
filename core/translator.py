@@ -4,7 +4,7 @@ import re
 
 
 def read_readme():
-    with open("README.md", "r", encoding="utf-8") as file:
+    with open("core/README.md", "r", encoding="utf-8") as file:
         return file.read()
 
 
@@ -17,18 +17,18 @@ def update_localizations():
     languages = [lang.strip() for lang in selected_langs.split(",")]
     files = []
 
-    if not os.path.exists("dist"):
-        os.makedirs("dist")
+    if not os.path.exists("core/dist"):
+        os.makedirs("core/dist")
 
     for lang in languages:
         try:
             translated_content = GoogleTranslator(
                 source='auto', target=lang).translate(text=no_links_content)
 
-            with open(f"dist/{lang}.md", "w", encoding="utf-8") as file:
+            with open(f"core/dist/{lang}.md", "w", encoding="utf-8") as file:
                 file.write(translated_content)
             print(f"Localization for {lang} updated.")
-            files.append(f"dist/{lang}.md")
+            files.append(f"core/dist/{lang}.md")
         except Exception as e:
             print(f"Failed to translate to {lang}: {str(e)}")
 
