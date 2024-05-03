@@ -4,9 +4,3 @@ author: mrf0rtuna4
 runs:
   using: 'docker'
   image: 'docker://python:3.8'
-  env:
-    DIST: ${{ inputs.dist }}
-inputs:
-    dist:
-      description: 'Path to the dist directory'
-      required: true
