@@ -1,3 +1,11 @@
+
+  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/russian.md">
+    <img src="https://img.shields.io/badge/Язык-Русский-blue" alt="Русский" />
+  </a>
+  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/italian.md">
+    <img src="https://img.shields.io/badge/Lingua-Italiana-blue" alt="Italiana" />
+  </a>
+
 # GitHub Readme AutoTranslator
 
 This GitHub Action automatically generates and pushes localized versions of your README.md file based on the supported languages.
@@ -40,11 +48,12 @@ jobs:
         run: python core/translator.py
 
       - name: Push to GitHub
-        uses: ad-m/github-push-action@master
+        uses: crazy-max/ghaction-github-pages@v3.1.0
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          branch: translations
-          force: true
+          target_branch: translations
+          build_dir: dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
 Replace `LANGS` with a comma-separated list of languages you want to generate.
@@ -86,4 +95,4 @@ For example, if you want to generate README files for Serbian, Italian, and Engl
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
