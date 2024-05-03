@@ -1,7 +1,7 @@
 name: Translate README
 on:
   schedule:
-    - cron: "0 */2124 * * *"
+    - cron: '0 */2124 * * *'
   
   workflow_dispatch:
   
@@ -12,6 +12,7 @@ on:
 jobs:
   translate:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -29,13 +30,13 @@ jobs:
       - name: Run translation
         env:
           GITHUB_TOKEN: ${{ secrets.GTK }}
-          LANGS: "serbian, italian, kazakh"
+          LANGS: 'serbian, italian, kazakh'
         run: python core/translator.py
 
       - name: Push to GitHub
+        uses: crazy-max/ghaction-github-pages@v3.1.0
+        with:
+          target_branch: translations
+          build_dir: dist
         env:
           GITHUB_TOKEN: ${{ secrets.GTK }}
-          USER: mrf0rtuna4/Github-Readme-AutoTranslator
-          LANGS: "serbian, italian, kazakh"
-          BRANCH: master
-        run: python core/push_to_git.py
