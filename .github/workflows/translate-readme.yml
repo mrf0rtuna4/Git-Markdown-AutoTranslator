@@ -33,6 +33,9 @@ jobs:
           LANGS: 'serbian, italian, kazakh'
         run: python core/translator.py
 
+      - name: Create build directory
+        run: mkdir -p dist
+
       - name: Push to GitHub
         uses: crazy-max/ghaction-github-pages@v3.1.0
         with:
