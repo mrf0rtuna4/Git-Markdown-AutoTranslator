@@ -14,9 +14,6 @@ jobs:
   translate:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
       - name: Run translation
         uses: mrf0rtuna4/Github-Readme-AutoTranslator@master
         env:
