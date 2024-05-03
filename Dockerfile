@@ -8,4 +8,4 @@ COPY core core
 
 RUN pip install -r requirements.txt
 
-CMD ["python", "/core/translator"]
+CMD ["python", "/core/translator.py"]
