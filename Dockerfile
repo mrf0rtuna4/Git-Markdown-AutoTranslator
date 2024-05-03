@@ -1,4 +1,4 @@
-FROM python:3.8 as builder
+FROM python:3.8
 
 WORKDIR /app
 
@@ -8,12 +8,6 @@ COPY core core
 
 RUN pip install -r requirements.txt
 
-RUN yarn build:action
+COPY --from=builder /app/core/dist/ dist/
 
-FROM python:3.8
-WORKDIR /action-end
-
-COPY --from=builder /app/core/dist/ /action-end/dist/
-COPY --from=builder /app/core/translator.py /action-end/
-
-CMD ["python", "translator.py"]
+CMD ["python", "/app/core/translator.py"]
