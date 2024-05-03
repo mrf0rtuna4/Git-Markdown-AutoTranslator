@@ -1,15 +1,11 @@
-name: "generate-readme-localed-files"
-description: "Generates localised readme files for your git"
-author: "mrf0rtuna4"
-color: orange
-icon: bar-chart
-inputs:
-  langs:
-    description: "Comma-separated list of languages to generate"
-    required: true
-  github_token:
-    description: "GitHub token for authentication"
-    required: true
+name: generate locale
+description: Generates localised readme files for your git
+author: mrf0rtuna4
 runs:
-  using: "python"
-  main: "core/translator.py"
+  using: 'docker'
+  image: 'docker://python:3.8'
+  entrypoint: /bin/sh -c
+  args:
+    - |
+      pip install -r requirements.txt
+      python -m core.translator
