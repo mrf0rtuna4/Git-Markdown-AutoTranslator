@@ -2,6 +2,8 @@ import os
 from deep_translator import GoogleTranslator
 import re
 
+print("Current working directory:", os.getcwd())
+
 
 def read_readme():
     print("Прочитал файлик ого")
