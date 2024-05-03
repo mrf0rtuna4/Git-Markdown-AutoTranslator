@@ -1,6 +1,6 @@
+import os
 from deep_translator import GoogleTranslator
 import re
-import os
 
 
 def read_readme():
@@ -22,10 +22,10 @@ def update_localizations():
             translated_content = GoogleTranslator(
                 source='auto', target=lang).translate(text=no_links_content)
 
-            with open(f"{lang}.md", "w", encoding="utf-8") as file:
+            with open(f"dist/{lang}.md", "w", encoding="utf-8") as file:
                 file.write(translated_content)
             print(f"Localization for {lang} updated.")
-            files.append(f"{lang}.md")
+            files.append(f"dist/{lang}.md")
         except Exception as e:
             print(f"Failed to translate to {lang}: {str(e)}")
 
