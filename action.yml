@@ -3,9 +3,10 @@ description: Generates localised readme files for your git
 author: mrf0rtuna4
 runs:
   using: 'docker'
-  image: 'docker://python:3.8'
-  entrypoint: /bin/sh -c
+  image: 'python:3.8'
+  entrypoint: /bin/sh
   args:
+    - -c
     - |
       pip install -r requirements.txt
       python -m core.translator
