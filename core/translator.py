@@ -4,13 +4,16 @@ import re
 
 
 def read_readme():
+    print("Прочитал файлик ого")
     with open("README.md", "r", encoding="utf-8") as file:
         return file.read()
 
 
 def update_localizations():
+    print("Starting update_localizations...")
     readme_content = read_readme()
     selected_langs = os.getenv("LANGS")
+    print("Selected langs:", selected_langs)
 
     no_links_content = re.sub(r"\[([^]]+)]\(([^)]+)\)", r"\1", readme_content)
 
@@ -32,6 +35,7 @@ def update_localizations():
         except Exception as e:
             print(f"Failed to translate to {lang}: {str(e)}")
 
+    print("update_localizations finished.")
     return files
 
 
