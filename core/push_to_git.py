@@ -5,7 +5,7 @@ from github import Auth
 
 def push_to_github():
     github_token = os.getenv('GITHUB_TOKEN')
-    user = os.getenv('USER')
+    repos = os.getenv('REPOS')
     langs = os.getenv('LANGS')
     branch = os.getenv('BRANCH')
 
@@ -13,7 +13,7 @@ def push_to_github():
 
     g = Github(auth=auth)
 
-    repo = g.get_repo(str(user))
+    repo = g.get_repo(str(repos))
 
     files = [f"{lang}.md" for lang in langs.split(",")]
     commit_message = 'Update translations'

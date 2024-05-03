@@ -13,9 +13,10 @@ def update_localizations():
     readme_content = read_readme()
     selected_langs = os.getenv("LANGS")
 
-    no_links_content = re.sub(r"\[([^\]]+)\]\(([^)]+)\)", r"\1", readme_content)
+    no_links_content = re.sub(r"\[([^]]+)]\(([^)]+)\)", r"\1", readme_content)
 
     languages = [lang.strip() for lang in selected_langs.split(",")]
+    files = []
     for lang in languages:
         try:
             translated_content = GoogleTranslator(
@@ -24,9 +25,11 @@ def update_localizations():
             with open(f"{lang}.md", "w", encoding="utf-8") as file:
                 file.write(translated_content)
             print(f"Localization for {lang} updated.")
+            files.append(f"{lang}.md")
         except Exception as e:
             print(f"Failed to translate to {lang}: {str(e)}")
 
+    return files
 
 
 update_localizations()
