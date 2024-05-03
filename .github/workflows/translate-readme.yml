@@ -14,11 +14,17 @@ jobs:
   translate:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
       - name: Run translation
         uses: mrf0rtuna4/Github-Readme-AutoTranslator@master
         env:
           GITHUB_TOKEN: ${{ secrets.GTK }}
           LANGS: 'serbian,italian,english'
+
+      - name: Copy files to dist
+        run: cp -r $GITHUB_WORKSPACE/*.md dist/
 
       - name: Push to GitHub
         uses: crazy-max/ghaction-github-pages@v3.1.0
