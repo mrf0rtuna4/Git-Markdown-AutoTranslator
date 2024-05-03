@@ -1,0 +1,32 @@
+name: Generate Localized Readme
+
+on:
+  schedule:
+    - cron: "0 */24 * * *"
+  
+  workflow_dispatch:
+  
+  push:
+    branches:
+    - master
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run translation
+        uses: mrf0rtuna4/Github-Readme-AutoTranslator@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GTK }}
+          LANGS: 'serbian,italian,english'
+
+      - name: Push to GitHub
+        uses: crazy-max/ghaction-github-pages@v3.1.0
+        with:
+          target_branch: translations
+          build_dir: dist
+        env:
+          GITHUB_TOKEN: ${{ secrets.GTK }}
