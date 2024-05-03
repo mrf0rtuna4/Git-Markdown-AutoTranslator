@@ -30,7 +30,7 @@ jobs:
       - name: Run translation
         env:
           GITHUB_TOKEN: ${{ secrets.GTK }}
-          LANGS: 'serbian, italian, kazakh'
+          LANGS: 'serbian, italian, kazakh, english'
         run: python core/translator.py
 
       - name: Push to GitHub

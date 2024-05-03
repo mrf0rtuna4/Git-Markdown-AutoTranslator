@@ -1,20 +1,13 @@
 name: "generate-readme-localed-files"
-description: "Generates localised readmi files for your git"
+description: "Generates localised readme files for your git"
 author: "mrf0rtuna4"
-
-runs:
-  using: python
-
 inputs:
-  github_user_name:
-    description: "github user name"
+  langs:
+    description: "Comma-separated list of languages to generate"
     required: true
   github_token:
-    description: "github token used to fetch the contribution calendar. Default to the action token if empty."
-    required: false
-    default: ${{ github.token }}
-  outputs:
-    required: false
-    description: |
-      list of files to generate.
-      one file per line. Each output can be customized with options as query string.
+    description: "GitHub token for authentication"
+    required: true
+runs:
+  using: "python"
+  main: "core/translator.py"

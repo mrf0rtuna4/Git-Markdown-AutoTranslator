@@ -9,7 +9,6 @@ def read_readme():
 
 
 def update_localizations():
-    langs = GoogleTranslator().get_supported_languages()
     readme_content = read_readme()
     selected_langs = os.getenv("LANGS")
 
