@@ -1,4 +1,4 @@
-name: generate locale
+name: Generate Localized Readme's
 description: Generates localised readme files for your git
 author: mrf0rtuna4
 runs:
