@@ -3,4 +3,4 @@ description: Generates localised readme files for your git
 author: mrf0rtuna4
 runs:
   using: 'docker'
-  image: 'docker://python:3.8'
+  image: 'Dockerfile'
