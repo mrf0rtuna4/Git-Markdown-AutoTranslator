@@ -12,53 +12,47 @@ This GitHub Action automatically generates and pushes localized versions of your
 
 ## Usage
 
-To use this action, create a workflow file (e.g., `.github/workflows/translate-readme.yml`) in your repository with the following content:
+To use this action, create a workflow file (e.g., `.github/workflows/translate.yml`) in your repository with the following content:
 
 ```yml
-name: Translate README
+name: Generate Localized Readme  # The name of your action
+
 on:
-  schedule:
-    - cron: '0 */12 * * *' # Runs every 12 hours
-  workflow_dispatch:
-  push:
+  schedule:  # Scheduled start
+    - cron: "0 */24 * * *"  # Every 24 hours
+
+  workflow_dispatch:  # Manual start
+  push:  # Run when committing to a branch
     branches:
-      - master # Specify your working branch, e.g. 'main'
+    - master # Set the name of your branch if required
 
 jobs:
-  translate:
-    runs-on: ubuntu-latest
+  translate:  # Task name
+    runs-on: ubuntu-latest  # Running on an Ubuntu image
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout code  # Step: code check
+        uses: actions/checkout@v2  # Using an action to test the code
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.8'
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Run translation
+      - name: Run translation  # Step: start the translation
+        uses: mrf0rtuna4/Github-Readme-AutoTranslator@v1.1.0  # Using an action to translate
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Specify your env parameter for the token
-          LANGS: 'serbian,italian,english' # Specify the languages of translation 
-        run: python core/translator.py
+          GITHUB_TOKEN: ${{ secrets.GTK }}  # Transferring a GitHub access token
 
-      - name: Push to GitHub
-        uses: crazy-max/ghaction-github-pages@v3.1.0
+          # List of languages to be translated
+          LANGS: 'serbian,italian,english'
+
+      - name: Push to GitHub  # Step: Submit changes to GitHub
+        uses: crazy-max/ghaction-github-pages@v3.1.0  # Using an action to publish to GitHub Pages
         with:
-          target_branch: translations
-          build_dir: dist
+          target_branch: translations  # The branch to which the changes will be sent
+          build_dir: 'dist'  # The directory with the collected files
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GTK }}  # Transferring a GitHub access token
 ```
 
 Replace `LANGS` with a comma-separated list of languages you want to generate.
 Available languages for translation:
-```text
+```yaml
     'afrikaans', 'albanian', 'amharic', 'arabic', 'armenian', 'assamese', 'aymara', 'azerbaijani', 'bambara', 'basque', 
     'belarusian', 'bengali', 'bhojpuri', 'bosnian', 'bulgarian', 'catalan', 'cebuano', 'chichewa', 'chinese (simplified)', 
     'chinese (traditional)', 'corsican', 'croatian', 'czech', 'danish', 'dhivehi', 'dogri', 'dutch', 'english', 'esperanto', 
