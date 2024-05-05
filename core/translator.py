@@ -3,21 +3,42 @@ from deep_translator import GoogleTranslator
 import re
 
 
-def read_readme():
+async def decompile_readme():
     with open("README.md", "r", encoding="utf-8") as file:
-        return file.read()
+        readme_content = file.read()
 
-
-def update_localizations():
-    readme_content = read_readme()
-    selected_langs = os.getenv("LANGS")
-
-    no_html_content = re.sub(r"<.*?>", "", readme_content)
-    code_blocks = re.findall(r"```[\s\S]*?```", no_html_content)
-    no_code_content = re.sub(r"```[\s\S]*?```", "CODE_BLOCK", no_html_content)
+    code_blocks = re.findall(r"```[\s\S]*?```", readme_content)
+    non_code_blocks = re.sub(r"```[\s\S]*?```", "CODE_BLOCK", readme_content)
+    links = re.findall(r"\[([^]]+)]\(([^)]+)\)", non_code_blocks)
+    non_code_blocks = re.sub(r"\[([^]]+)]\(([^)]+)\)", "LINK", non_code_blocks)
+    html_tags = re.findall(r"<.*?>", non_code_blocks)
+    non_code_blocks = re.sub(r"<.*?>", "HTML_TAG", non_code_blocks)
 
     chunk_size = 5000
-    chunks = [no_code_content[i:i + chunk_size] for i in range(0, len(no_code_content), chunk_size)]
+    chunks = [non_code_blocks[i:i + chunk_size]
+              for i in range(0, len(non_code_blocks), chunk_size)]
+
+    return chunks, {"code_blocks": code_blocks, "links": links, "html_tags": html_tags}
+
+
+async def build_readme(translated_chunks, data):
+    translated_content = " ".join(translated_chunks)
+
+    for i, code_block in enumerate(data["code_blocks"]):
+        translated_content = translated_content.replace(f"CODE_BLOCK", code_block, 1)
+
+    for i, link in enumerate(data["links"]):
+        translated_content = translated_content.replace(f"LINK", f"[{link[0]}]({link[1]})", 1)
+
+    for i, html_tag in enumerate(data["html_tags"]):
+        translated_content = translated_content.replace(f"HTML_TAG", html_tag, 1)
+
+    return translated_content
+
+
+async def update_localizations():
+    chunks, data = await decompile_readme()
+    selected_langs = os.getenv("LANGS")
 
     languages = [lang.strip() for lang in selected_langs.split(",")]
     files = []
@@ -27,12 +48,12 @@ def update_localizations():
 
     for lang in languages:
         try:
-            translated_chunks = [GoogleTranslator(source='auto', target=lang).translate(text=chunk) for chunk in chunks]
-            translated_content = " ".join(translated_chunks)
+            translated_chunks = []
+            for chunk in chunks:
+                translated_chunk = GoogleTranslator(source='auto', target=lang).translate(text=chunk)
+                translated_chunks.append(translated_chunk)
 
-            # Add code blocks back
-            for i, block in enumerate(code_blocks):
-                translated_content = translated_content.replace(f"CODE_BLOCK", block, 1)
+            translated_content = await build_readme(translated_chunks, data)
 
             with open(f"dist/{lang}.md", "w", encoding="utf-8") as file:
                 file.write(translated_content)
