@@ -1,4 +1,5 @@
 import os
+import asyncio
 from deep_translator import GoogleTranslator
 import re
 
@@ -65,4 +66,7 @@ async def update_localizations():
     return files
 
 
-update_localizations()
+async def main():
+    await update_localizations()
+
+asyncio.run(main())
