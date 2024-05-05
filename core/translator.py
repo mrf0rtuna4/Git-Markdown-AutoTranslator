@@ -38,7 +38,9 @@ async def build_readme(translated_chunks, data):
 
 
 async def update_localizations():
-    chunks, data = await decompile_readme()
+    every = await decompile_readme()
+    chunks = every[0]
+    data = every[1]
     selected_langs = os.getenv("LANGS")
 
     languages = [lang.strip() for lang in selected_langs.split(",")]
