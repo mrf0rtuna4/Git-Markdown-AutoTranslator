@@ -19,11 +19,14 @@ async def decompile_readme():
     chunks = [supported_content[i:i + chunk_size]
               for i in range(0, len(supported_content), chunk_size)]
 
+    print("💠 Let's start collecting the content.")
+
     return chunks, {"code_blocks": code_blocks, "links": links, "html_tags": html_tags}
 
 
 async def build_readme(translated_chunks, data):
     translated_content = " ".join(translated_chunks)
+    print("📦 Let's start collecting the translation.")
 
     for i, code_block in enumerate(data["code_blocks"]):
         translated_content = translated_content.replace(f"10001", code_block, 1)
@@ -60,15 +63,17 @@ async def update_localizations():
 
             with open(f"dist/{lang}.md", "w", encoding="utf-8") as file:
                 file.write(translated_content)
-            print(f"Localization for {lang} updated.")
+            print(f"✅ Localization for {lang} updated.")
             files.append(f"dist/{lang}.md")
         except Exception as e:
-            print(f"Failed to translate to {lang}: {str(e)}")
+            print(f"❌ Failed to translate to {lang}: {str(e)}")
 
+    print("🎉 All localizations updated.")
     return files
 
 
 async def main():
     await update_localizations()
+
 
 asyncio.run(main())
