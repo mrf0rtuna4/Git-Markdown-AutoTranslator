@@ -84,7 +84,6 @@ For example, if you want to generate README files for Serbian, Italian, and Engl
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LANGS: 'serbian,italian,english'
-        run: python core/translator.py
 ```
 
 ## License

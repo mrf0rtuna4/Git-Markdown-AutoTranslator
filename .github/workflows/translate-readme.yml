@@ -21,7 +21,7 @@ jobs:
         uses: mrf0rtuna4/Github-Readme-AutoTranslator@master
         env:
           GITHUB_TOKEN: ${{ secrets.GTK }}
-          LANGS: 'serbian,italian,english'
+          LANGS: 'serbian,italian,russian'
 
       - name: Push to GitHub
         uses: crazy-max/ghaction-github-pages@v3.1.0
