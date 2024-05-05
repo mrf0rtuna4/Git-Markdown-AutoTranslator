@@ -9,11 +9,11 @@ async def decompile_readme():
         readme_content = file.read()
 
     code_blocks = re.findall(r"```[\s\S]*?```", readme_content)
-    non_code_blocks = re.sub(r"```[\s\S]*?```", "CODE_BLOCK", readme_content)
+    non_code_blocks = re.sub(r"```[\s\S]*?```", "CoDE_Bl0CK", readme_content)
     links = re.findall(r"\[([^]]+)]\(([^)]+)\)", non_code_blocks)
-    non_code_blocks = re.sub(r"\[([^]]+)]\(([^)]+)\)", "LINK", non_code_blocks)
+    non_code_blocks = re.sub(r"\[([^]]+)]\(([^)]+)\)", "LIНК", non_code_blocks)
     html_tags = re.findall(r"<.*?>", non_code_blocks)
-    non_code_blocks = re.sub(r"<.*?>", "HTML_TAG", non_code_blocks)
+    non_code_blocks = re.sub(r"<.*?>", "H3ML_TEG", non_code_blocks)
 
     chunk_size = 5000
     chunks = [non_code_blocks[i:i + chunk_size]
@@ -26,13 +26,13 @@ async def build_readme(translated_chunks, data):
     translated_content = " ".join(translated_chunks)
 
     for i, code_block in enumerate(data["code_blocks"]):
-        translated_content = translated_content.replace(f"CODE_BLOCK", code_block, 1)
+        translated_content = translated_content.replace(f"CoDE_Bl0CK", code_block, 1)
 
     for i, link in enumerate(data["links"]):
-        translated_content = translated_content.replace(f"LINK", f"[{link[0]}]({link[1]})", 1)
+        translated_content = translated_content.replace(f"LIНК", f"[{link[0]}]({link[1]})", 1)
 
     for i, html_tag in enumerate(data["html_tags"]):
-        translated_content = translated_content.replace(f"HTML_TAG", html_tag, 1)
+        translated_content = translated_content.replace(f"H3ML_TEG", html_tag, 1)
 
     return translated_content
 
