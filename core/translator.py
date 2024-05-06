@@ -69,6 +69,7 @@ async def update_localizations():
     if not os.path.exists("dist"):
         os.makedirs("dist")
 
+    tasks = []
     for lang in languages:
         try:
             translated_chunks = []
@@ -76,14 +77,21 @@ async def update_localizations():
                 translated_chunk = GoogleTranslator(source='auto', target=lang).translate(text=chunk)
                 translated_chunks.append(translated_chunk)
 
-            translated_content = await build_readme(translated_chunks, data)
+            task = build_readme(translated_chunks, data)
+            tasks.append(task)
+        except Exception as e:
+            print(f"❌ Failed to translate to {lang}: {str(e)}")
 
+    translated_contents = await asyncio.gather(*tasks)
+
+    for lang, translated_content in zip(languages, translated_contents):
+        try:
             with open(f"dist/{lang}.md", "w", encoding="utf-8") as file:
                 file.write(translated_content)
             print(f"✅ Localization for {lang} updated.")
             files.append(f"dist/{lang}.md")
         except Exception as e:
-            print(f"❌ Failed to translate to {lang}: {str(e)}")
+            print(f"❌ Failed to write translated content for {lang}: {str(e)}")
 
     print("🎉 All localizations updated.")
     return files
