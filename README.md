@@ -34,7 +34,7 @@ jobs:
         uses: actions/checkout@v2  # Using an action to test the code
 
       - name: Run translation  # Step: start the translation
-        uses: mrf0rtuna4/Github-Readme-AutoTranslator@v1.1.0  # Using an action to translate
+        uses: mrf0rtuna4/Github-Readme-AutoTranslator@v1.2.0  # Using an action to translate
         env:
           GITHUB_TOKEN: ${{ secrets.GTK }}  # Transferring a GitHub access token
 
