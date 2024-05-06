@@ -1,9 +1,6 @@
 name: Generate Localized Readme
 
 on:
-  schedule:
-    - cron: "0 */24 * * *"
-
   workflow_dispatch:
 
   push:
@@ -21,7 +18,7 @@ jobs:
         uses: mrf0rtuna4/Github-Readme-AutoTranslator@master
         env:
           GITHUB_TOKEN: ${{ secrets.GTK }}
-          LANGS: 'serbian,italian,russian'
+          LANGS: 'serbian,italian,russian,japan'
 
       - name: Push to GitHub
         uses: crazy-max/ghaction-github-pages@v3.1.0

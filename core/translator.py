@@ -5,6 +5,11 @@ import re
 
 
 async def decompile_readme():
+    """
+    Decompile the README file into chunks and extract code blocks, links, and HTML tags.
+
+    :return: Tuple containing the chunks of text and a dictionary with extracted data.
+    """
     with open("README.md", "r", encoding="utf-8") as file:
         readme_content = file.read()
 
@@ -25,8 +30,15 @@ async def decompile_readme():
 
 
 async def build_readme(translated_chunks, data):
+    """
+    Rebuild the translated chunks into a complete translated README content.
+
+    :param translated_chunks: List of translated text chunks.
+    :param data: Dictionary containing extracted data like code blocks, links, and HTML tags.
+    :return: Translated README content.
+    """
     translated_content = " ".join(translated_chunks)
-    print("📦 Let's start collecting the translation.")
+    print("📦 Let's start building the translation.")
 
     for i, code_block in enumerate(data["code_blocks"]):
         translated_content = translated_content.replace(f"10001", code_block, 1)
@@ -41,6 +53,11 @@ async def build_readme(translated_chunks, data):
 
 
 async def update_localizations():
+    """
+    Update the localizations for the specified languages.
+
+    :return: updated files
+    """
     every = await decompile_readme()
     chunks = every[0]
     data = every[1]
