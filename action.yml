@@ -1,7 +1,9 @@
 name: Generate Localized Readme
-icon: battery-charging
 description: Generates localised readme files for your git
 author: mrf0rtuna4
+branding:
+  icon: 'cloud-lightning'
+  color: 'green'
 runs:
   using: 'docker'
   image: 'Dockerfile'
