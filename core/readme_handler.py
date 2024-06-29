@@ -23,7 +23,7 @@ class ReadmeHandler:
             text = text.replace(f"PLACEHOLDER_{placeholder}", placeholder)
         return text
 
-    def decompile_readme(self):
+    async def decompile_readme(self):
         """
         Decompile the README file into chunks and extract code blocks, links, and HTML tags.
 
@@ -51,7 +51,7 @@ class ReadmeHandler:
 
         return chunks, {"code_blocks": code_blocks, "links": links, "html_tags": html_tags}
 
-    def build_readme(self, translated_chunks, data):
+    async def build_readme(self, translated_chunks, data):
         """
         Rebuild the translated chunks into a complete translated README content.
 
