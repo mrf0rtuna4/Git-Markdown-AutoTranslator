@@ -3,6 +3,15 @@ import asyncio
 from deep_translator import GoogleTranslator
 from readme_handler import ReadmeHandler
 
+################################
+#     Development Varibles     #
+from dotenv import load_dotenv 
+
+
+load_dotenv()
+#         DO NOT USE           #
+################################
+
 
 class LocalizationManager:
     def __init__(self, langs, readme_path="README.md", dist_dir="dist"):
@@ -32,7 +41,7 @@ class LocalizationManager:
                         source='auto', target=lang).translate(text=chunk)
                     translated_chunks.append(translated_chunk)
 
-                task = await self.readme_handler.build_readme(
+                task = self.readme_handler.build_readme(
                     translated_chunks, data)
                 tasks.append(task)
             except Exception as e:
@@ -60,7 +69,6 @@ async def main():
     if selected_langs is None:
         print("❌ LANGS environment variable not set.")
         return
-
     manager = LocalizationManager(selected_langs)
     await manager.update_localizations()
 

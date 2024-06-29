@@ -1,3 +1,6 @@
 /logs
 venv
 .idea
+*__*
+/dist
+.env

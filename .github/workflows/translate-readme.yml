@@ -17,7 +17,7 @@ jobs:
       - name: Run translation
         uses: mrf0rtuna4/Github-Readme-AutoTranslator@master
         env:
-          LANGS: 'serbian,italian,russian,japan'
+          LANGS: 'ru, ar, uk, it, ja'
 
       - name: Push to GitHub
         uses: crazy-max/ghaction-github-pages@v3.1.0
