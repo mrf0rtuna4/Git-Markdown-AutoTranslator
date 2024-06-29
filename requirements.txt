@@ -1,2 +1,3 @@
 PyGithub
 deep_translator
+python-dotenv
