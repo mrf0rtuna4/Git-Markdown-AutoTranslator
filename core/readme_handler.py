@@ -5,6 +5,24 @@ class ReadmeHandler:
     def __init__(self, file_path):
         self.file_path = file_path
 
+    def _sanitize_placeholders(self, text):
+        """
+        Ensure placeholders don't conflict with the original content.
+        """
+        placeholders = ["ENCODED_BLOCK", "ENCODED_LINK", "ENCODED_HTML"]
+        for placeholder in placeholders:
+            text = text.replace(placeholder, f"PLACEHOLDER_{placeholder}")
+        return text
+
+    def _restore_placeholders(self, text):
+        """
+        Restore placeholders to their original form.
+        """
+        placeholders = ["ENCODED_BLOCK", "ENCODED_LINK", "ENCODED_HTML"]
+        for placeholder in placeholders:
+            text = text.replace(f"PLACEHOLDER_{placeholder}", placeholder)
+        return text
+
     def decompile_readme(self):
         """
         Decompile the README file into chunks and extract code blocks, links, and HTML tags.
@@ -13,6 +31,8 @@ class ReadmeHandler:
         """
         with open(self.file_path, "r", encoding="utf-8") as file:
             readme_content = file.read()
+
+        readme_content = self._sanitize_placeholders(readme_content)
 
         code_blocks = re.findall(r"```[\s\S]*?```", readme_content)
         supported_content = re.sub(
@@ -42,16 +62,18 @@ class ReadmeHandler:
         translated_content = " ".join(translated_chunks)
         print("📦 Let's start building the translation.")
 
+        translated_content = self._restore_placeholders(translated_content)
+
         for i, code_block in enumerate(data["code_blocks"]):
             translated_content = translated_content.replace(
-                f"ENCODED_BLOCK", code_block, 1)
+                "ENCODED_BLOCK", code_block, 1)
 
         for i, link in enumerate(data["links"]):
             translated_content = translated_content.replace(
-                f"ENCODED_LINK", f"[{link[0]}]({link[1]})", 1)
+                "ENCODED_LINK", f"[{link[0]}]({link[1]})", 1)
 
         for i, html_tag in enumerate(data["html_tags"]):
             translated_content = translated_content.replace(
-                f"ENCODED_HTML", html_tag, 1)
+                "ENCODED_HTML", html_tag, 1)
 
         return translated_content
