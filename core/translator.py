@@ -16,7 +16,7 @@ class LocalizationManager:
 
         :return: updated files
         """
-        chunks, data = self.readme_handler.decompile_readme()
+        chunks, data = await self.readme_handler.decompile_readme()
         languages = [lang.strip() for lang in self.langs.split(",")]
         files = []
 
@@ -32,7 +32,7 @@ class LocalizationManager:
                         source='auto', target=lang).translate(text=chunk)
                     translated_chunks.append(translated_chunk)
 
-                task = self.readme_handler.build_readme(
+                task = await self.readme_handler.build_readme(
                     translated_chunks, data)
                 tasks.append(task)
             except Exception as e:
