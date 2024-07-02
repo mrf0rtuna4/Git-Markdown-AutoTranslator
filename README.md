@@ -1,26 +1,11 @@
+# GitHub Readme AutoTranslator
 <div align="center">
-  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/ru.md">
-      <img src="https://img.shields.io/badge/Язык-Руский-blue" alt="Руский" />
-  </a>
-  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/ja.md">
-      <img src="https://img.shields.io/badge/言語-日本語-blue" alt="日本語" />
-  </a>
-  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/it.md">
-      <img src="https://img.shields.io/badge/Lingua-Italiano-blue" alt="Italiano" />
-  </a>
-  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/uk.md">
-      <img src="https://img.shields.io/badge/Мова-Українська-blue" alt="Українська" />
-  </a>
-  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/ar.md">
-      <img src="https://img.shields.io/badge/لغة-العربية-blue" alt="العربية" />
-  </a>
+  <img src="https://img.shields.io/github/v/release/mrf0rtuna4/Github-Readme-AutoTranslator">
+  <img src="https://img.shields.io/github/actions/workflow/status/mrf0rtuna4/Github-Readme-AutoTranslator/translate-readme.yml">
 </div>
 
-# GitHub Readme AutoTranslator
 
 > [!WARNING]
-> This action DOES NOT USE AI.
-> 
 > We only use TRANSLATION DeepL
 >
 > This may affect the quality of the translation. It may also cause the system to MIS-identify your file data.
@@ -52,9 +37,8 @@ jobs:
 
       - name: Run translation  # Step: start the translation
         uses: mrf0rtuna4/Github-Readme-AutoTranslator@v1.2.0  # Using an action to translate
-
-          # List of languages to be translated
-          LANGS: 'serbian,italian,english'
+        env:
+          LANGS: 'english,italian,dutch,spanish' # List of languages to be translated
 
       - name: Push to GitHub  # Step: Submit changes to GitHub
         uses: crazy-max/ghaction-github-pages@v3.1.0  # Using an action to publish to GitHub Pages
@@ -100,6 +84,25 @@ For example, if you want to generate README files for Serbian, Italian, and Engl
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LANGS: 'serbian,italian,english'
 ```
+
+And you can view, how to work action by clicking this widgets:
+<div align="center">
+  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/ru.md">
+      <img src="https://img.shields.io/badge/Язык-Руский-blue" alt="Руский" />
+  </a>
+  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/ja.md">
+      <img src="https://img.shields.io/badge/言語-日本語-blue" alt="日本語" />
+  </a>
+  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/it.md">
+      <img src="https://img.shields.io/badge/Lingua-Italiano-blue" alt="Italiano" />
+  </a>
+  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/uk.md">
+      <img src="https://img.shields.io/badge/Мова-Українська-blue" alt="Українська" />
+  </a>
+  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/ar.md">
+      <img src="https://img.shields.io/badge/لغة-العربية-blue" alt="العربية" />
+  </a>
+</div>
 
 ## License
 
