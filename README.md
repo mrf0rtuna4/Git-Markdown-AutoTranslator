@@ -1,12 +1,29 @@
-
-  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/russian.md">
-    <img src="https://img.shields.io/badge/Язык-Русский-blue" alt="Русский" />
+<div align="center">
+  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/ru.md">
+      <img src="https://img.shields.io/badge/Язык-Руский-blue" alt="Руский" />
   </a>
-  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/italian.md">
-    <img src="https://img.shields.io/badge/Lingua-Italiana-blue" alt="Italiana" />
+  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/ja.md">
+      <img src="https://img.shields.io/badge/言語-日本語-blue" alt="日本語" />
   </a>
+  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/it.md">
+      <img src="https://img.shields.io/badge/Lingua-Italiano-blue" alt="Italiano" />
+  </a>
+  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/uk.md">
+      <img src="https://img.shields.io/badge/Мова-Українська-blue" alt="Українська" />
+  </a>
+  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/ar.md">
+      <img src="https://img.shields.io/badge/لغة-العربية-blue" alt="العربية" />
+  </a>
+</div>
 
 # GitHub Readme AutoTranslator
+
+> [!WARNING]
+> This action DOES NOT USE AI.
+> 
+> We only use TRANSLATION DeepL
+>
+> This may affect the quality of the translation. It may also cause the system to MIS-identify your file data.
 
 This GitHub Action automatically generates and pushes localized versions of your README.md file based on the supported languages.
 
