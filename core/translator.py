@@ -1,18 +1,12 @@
-import os
 import asyncio
+import os
 
 import deep_translator
-from readme_handler import ReadmeHandler
-
-################################
-#     Development Varibles     #
 from dotenv import load_dotenv
 
+from readme_handler import ReadmeHandler
 
 load_dotenv()
-#         DO NOT USE           #
-################################
-
 
 ERR_CODE_FAILED_TO_TRANSLATE = -1
 ERR_CODE_FAILED_TO_WRITE = -2
@@ -23,6 +17,24 @@ class LocalizationManager:
         self.langs = langs
         self.readme_handler = ReadmeHandler(readme_path)
         self.dist_dir = dist_dir
+
+    @staticmethod
+    async def translate_chunk(chunk, lang):
+        translator = deep_translator.GoogleTranslator(
+            source='auto', target=lang)
+        retry_attempts = 2
+        for attempt in range(retry_attempts):
+            try:
+                return translator.translate(text=chunk)
+            except deep_translator.exceptions.RequestError as e:
+                if attempt < retry_attempts - 1:
+                    print(
+                        f"❌ Failed to translate to {lang}, attempt {attempt + 1}: {str(e)}")
+                    print(f"♻️ Retrying after 3 seconds...")
+                    await asyncio.sleep(3)
+                else:
+                    print(f"❌ Totally failed to translate to {lang}: {str(e)}")
+                    exit(ERR_CODE_FAILED_TO_TRANSLATE)
 
     async def update_localizations(self):
         """
@@ -40,25 +52,11 @@ class LocalizationManager:
         tasks = []
         for lang in languages:
             translated_chunks = []
-
             for chunk in chunks:
-                def translate_chunk():
-                    translated_chunk = deep_translator.GoogleTranslator(
-                        source='auto', target=lang).translate(text=chunk)
-                    translated_chunks.append(translated_chunk)
-                try:
-                    translate_chunk()
-                except deep_translator.exceptions.RequestError as e:
-                    print(f"❌ Failed to translate to {lang}: {str(e)}")
-                    print(f"♻️ Retrying after 3 seconds...")
-                    try:
-                        translate_chunk()
-                    except deep_translator.exceptions.RequestError as e:
-                        print(f"❌ Totally failed to translate to {lang}: {str(e)}")
-                        exit(ERR_CODE_FAILED_TO_TRANSLATE)
+                translated_chunk = await self.translate_chunk(chunk, lang)
+                translated_chunks.append(translated_chunk)
 
-            task = self.readme_handler.build_readme(
-                translated_chunks, data)
+            task = self.readme_handler.build_readme(translated_chunks, data)
             tasks.append(task)
 
         translated_contents = await asyncio.gather(*tasks)
@@ -71,7 +69,8 @@ class LocalizationManager:
                 print(f"✅ Localization for {lang} updated.")
                 files.append(file_path)
             except Exception as e:
-                print(f"❌ Failed to write translated content for {lang}: {str(e)}")
+                print(
+                    f"❌ Failed to write translated content for {lang}: {str(e)}")
                 exit(ERR_CODE_FAILED_TO_WRITE)
 
         print("🎉 All localizations updated.")
@@ -80,10 +79,11 @@ class LocalizationManager:
 
 async def main():
     selected_langs = os.getenv("LANGS")
-    if selected_langs is None:
+    if not selected_langs:
         print("❌ LANGS environment variable not set.")
         return
     manager = LocalizationManager(selected_langs)
     await manager.update_localizations()
+
 
 asyncio.run(main())
