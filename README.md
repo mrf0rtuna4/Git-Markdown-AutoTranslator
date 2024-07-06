@@ -20,13 +20,15 @@ To use this action, create a workflow file (e.g., `.github/workflows/translate.y
 name: Generate Localized Readme  # The name of your action
 
 on:
-  schedule:  # Scheduled start
-    - cron: "0 */24 * * *"  # Every 24 hours
-
   workflow_dispatch:  # Manual start
   push:  # Run when committing to a branch
     branches:
     - master # Set the name of your branch if required
+    paths: # Start translating only if readme file changed in current push
+    - 'README.MD'
+    - 'README.md'
+    - 'readme.md'
+    - 'Readme.md'
 
 jobs:
   translate:  # Task name
@@ -50,7 +52,9 @@ jobs:
 ```
 
 Replace `LANGS` with a comma-separated list of languages you want to generate.
-Available languages for translation:
+<details>
+<summary>Available languages for translation (complete references)</summary>
+
 ```yaml
     'afrikaans', 'albanian', 'amharic', 'arabic', 'armenian', 'assamese', 'aymara', 'azerbaijani', 'bambara', 'basque', 
     'belarusian', 'bengali', 'bhojpuri', 'bosnian', 'bulgarian', 'catalan', 'cebuano', 'chichewa', 'chinese (simplified)', 
@@ -66,13 +70,29 @@ Available languages for translation:
     'telugu', 'thai', 'tigrinya', 'tsonga', 'turkish', 'turkmen', 'twi', 'ukrainian', 'urdu', 'uyghur', 'uzbek', 'vietnamese', 
     'welsh', 'xhosa', 'yiddish', 'yoruba', 'zulu'
 ```
+</details>
+
+<details>
+<summary>Available languages for translation (short addresses)</summary>
+
+```yaml
+'af', 'sq', 'am', 'ar', 'hy', 'as', 'ay', 'az', 'bm', 'eu', 'be', 'bn', 'bho', 'bs', 'bg', 'ca', 'ceb', 'ny',
+'zh-CN', 'zh-TW', 'co', 'hr', 'cs', 'da', 'dv', 'doi', 'nl', 'en', 'eo', 'et', 'ee', 'tl', 'fi', 'fr', 'fy', 'gl',
+'ka', 'de', 'el', 'gn', 'gu', 'ht', 'ha', 'haw', 'iw', 'hi', 'hmn', 'hu', 'is', 'ig', 'ilo', 'id', 'ga', 'it', 'ja',
+'jw', 'kn', 'kk', 'km', 'rw', 'gom', 'ko', 'kri', 'ku', 'ckb', 'ky', 'lo', 'la', 'lv', 'ln', 'lt', 'lg', 'lb', 'mk',
+'mai', 'mg', 'ms', 'ml', 'mt', 'mi', 'mr', 'mni-Mtei', 'lus', 'mn', 'my', 'ne', 'no', 'or', 'om', 'ps', 'fa', 'pl',
+'pt', 'pa', 'qu', 'ro', 'ru', 'sm', 'sa', 'gd', 'nso', 'sr', 'st', 'sn', 'sd', 'si', 'sk', 'sl', 'so', 'es', 'su',
+'sw', 'sv', 'tg', 'ta', 'tt', 'te', 'th', 'ti', 'ts', 'tr', 'tk', 'ak', 'uk', 'ur', 'ug', 'uz', 'vi', 'cy', 'xh', 'yi', 'yo', 'zu'
+```
+
+</details>
+
 
 ## Configuration
 
 You can configure this action using the following inputs:
 
 - `langs`: A comma-separated list of languages to generate.
-- `github_token`: GitHub token for authentication.
 
 ## Example
 
@@ -81,7 +101,6 @@ For example, if you want to generate README files for Serbian, Italian, and Engl
 ```yml
       - name: Run translation
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LANGS: 'serbian,italian,english'
 ```
 
