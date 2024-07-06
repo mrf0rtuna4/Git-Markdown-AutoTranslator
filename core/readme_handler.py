@@ -43,7 +43,7 @@ class ReadmeHandler:
         html_tags = re.findall(r"<.*?>", supported_content)
         supported_content = re.sub(r"<.*?>", "ENCODED_HTML", supported_content)
 
-        chunk_size = 5000
+        chunk_size = 2048
         chunks = [supported_content[i:i + chunk_size]
                   for i in range(0, len(supported_content), chunk_size)]
 
