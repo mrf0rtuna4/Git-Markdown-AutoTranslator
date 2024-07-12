@@ -6,4 +6,4 @@ COPY core /core
 
 RUN pip install -r requirements.txt
 
-ENTRYPOINT ["python", "/core/translator.py"]
+ENTRYPOINT ["python", "/core/main.py"]

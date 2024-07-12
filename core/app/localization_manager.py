@@ -2,11 +2,10 @@ import asyncio
 import os
 
 import deep_translator
-from dotenv import load_dotenv
 
-from readme_handler import ReadmeHandler
-
-load_dotenv()
+from app.readme_handler import ReadmeHandler
+from app.markdown_processor import MarkdownProcessor
+from app.logger import log_info, log_error
 
 ERR_CODE_FAILED_TO_TRANSLATE = -1
 ERR_CODE_FAILED_TO_WRITE = -2
@@ -16,6 +15,7 @@ class LocalizationManager:
     def __init__(self, langs, readme_path="README.md", dist_dir="dist"):
         self.langs = langs
         self.readme_handler = ReadmeHandler(readme_path)
+        self.processor = MarkdownProcessor()
         self.dist_dir = dist_dir
 
     @staticmethod
@@ -28,12 +28,13 @@ class LocalizationManager:
                 return translator.translate(text=chunk)
             except deep_translator.exceptions.RequestError as e:
                 if attempt < retry_attempts - 1:
-                    print(
+                    log_error(
                         f"❌ Failed to translate to {lang}, attempt {attempt + 1}: {str(e)}")
-                    print(f"♻️ Retrying after 3 seconds...")
+                    log_info(f"♻️ Retrying after 3 seconds...")
                     await asyncio.sleep(3)
                 else:
-                    print(f"❌ Totally failed to translate to {lang}: {str(e)}")
+                    log_error(
+                        f"❌ Totally failed to translate to {lang}: {str(e)}")
                     exit(ERR_CODE_FAILED_TO_TRANSLATE)
 
     async def update_localizations(self):
@@ -42,7 +43,10 @@ class LocalizationManager:
 
         :return: updated files
         """
-        chunks, data = await self.readme_handler.decompile_readme()
+        with open(self.readme_handler.file_path, "r", encoding="utf-8") as file:
+            readme_content = file.read()
+
+        chunks, _ = self.processor.decompile_readme(readme_content)
         languages = [lang.strip() for lang in self.langs.split(",")]
         files = []
 
@@ -56,34 +60,29 @@ class LocalizationManager:
                 translated_chunk = await self.translate_chunk(chunk, lang)
                 translated_chunks.append(translated_chunk)
 
-            task = self.readme_handler.build_readme(translated_chunks, data)
+            translated_content = self.processor.build_readme(translated_chunks, lang)
+            self.processor.post_check_placeholders(translated_content)
+            task = self.write_to_file(lang, translated_content)
             tasks.append(task)
 
-        translated_contents = await asyncio.gather(*tasks)
-
-        for lang, translated_content in zip(languages, translated_contents):
-            try:
-                file_path = os.path.join(self.dist_dir, f"{lang}.md")
-                with open(file_path, "w", encoding="utf-8") as file:
-                    file.write(translated_content)
-                print(f"✅ Localization for {lang} updated.")
-                files.append(file_path)
-            except Exception as e:
-                print(
-                    f"❌ Failed to write translated content for {lang}: {str(e)}")
-                exit(ERR_CODE_FAILED_TO_WRITE)
-
-        print("🎉 All localizations updated.")
+        files = await asyncio.gather(*tasks)
+        log_info("🎉 All localizations updated.")
         return files
 
+    async def write_to_file(self, lang, content):
+        """
+        Write the translated content to a file.
 
-async def main():
-    selected_langs = os.getenv("LANGS")
-    if not selected_langs:
-        print("❌ LANGS environment variable not set.")
-        return
-    manager = LocalizationManager(selected_langs)
-    await manager.update_localizations()
-
-
-asyncio.run(main())
+        :param lang: Language of the translated content.
+        :param content: Translated content.
+        :return: Path to the written file.
+        """
+        try:
+            file_path = os.path.join(self.dist_dir, f"{lang}.md")
+            with open(file_path, "w", encoding="utf-8") as file:
+                file.write(content)
+            return file_path
+        except Exception as e:
+            log_error(
+                f"❌ Failed to write translated content for {lang}: {str(e)}")
+            exit(ERR_CODE_FAILED_TO_WRITE)
