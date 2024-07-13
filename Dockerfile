@@ -1,11 +1,11 @@
 FROM python:3.8
 
-COPY requirements.txt /requirements.txt
+WORKDIR /core
 
-COPY core /core
+COPY requirements.txt /core/
 
-COPY core/app /core/app
+RUN pip install -r /core/requirements.txt
 
-RUN pip install -r requirements.txt
+COPY core /core/core
 
-ENTRYPOINT ["python", "/core/main.py"]
+ENTRYPOINT ["python", "/core/core/app/main.py"]
