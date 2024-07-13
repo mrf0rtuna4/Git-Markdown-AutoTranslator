@@ -3,10 +3,8 @@ COPY requirements.txt /requirements.txt
 
 RUN pip install -r requirements.txt
 
-COPY core /core
+COPY core ./core
 
-WORKDIR /core
-
-COPY app /app
+COPY --parents ./core/app/*.py ./core/app/
 
 ENTRYPOINT ["python", "main.py"]
