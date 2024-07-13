@@ -8,4 +8,6 @@ RUN pip install -r requirements.txt
 
 COPY core/app /core/app
 
+COPY core /core
+
 ENTRYPOINT ["python", "/core/main.py"]
