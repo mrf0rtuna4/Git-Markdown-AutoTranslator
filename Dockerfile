@@ -7,4 +7,4 @@ COPY core ./core
 
 COPY ./core/app/*.py ./core/app/
 
-ENTRYPOINT ["python", "main.py"]
+ENTRYPOINT ["python", "/core/main.py"]
