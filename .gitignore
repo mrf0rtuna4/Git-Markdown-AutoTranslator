@@ -1,6 +1,6 @@
 /logs
 venv
 .idea
-*__*
 /dist
 .env
+__pycache__
