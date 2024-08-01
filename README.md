@@ -106,19 +106,19 @@ For example, if you want to generate README files for Serbian, Italian, and Engl
 
 And you can view, how to work action by clicking this widgets:
 <div align="center">
-  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/ru.md">
+  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations_indev/ru.md">
       <img src="https://img.shields.io/badge/Язык-Руский-blue" alt="Руский" />
   </a>
-  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/ja.md">
+  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations_indev/ja.md">
       <img src="https://img.shields.io/badge/言語-日本語-blue" alt="日本語" />
   </a>
-  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/it.md">
+  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations_indev/it.md">
       <img src="https://img.shields.io/badge/Lingua-Italiano-blue" alt="Italiano" />
   </a>
-  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/uk.md">
+  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations_indev/uk.md">
       <img src="https://img.shields.io/badge/Мова-Українська-blue" alt="Українська" />
   </a>
-  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/ar.md">
+  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations_indev/ar.md">
       <img src="https://img.shields.io/badge/لغة-العربية-blue" alt="العربية" />
   </a>
 </div>
