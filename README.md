@@ -1,7 +1,7 @@
 # GitHub Readme AutoTranslator
 <div align="center">
   <img src="https://img.shields.io/github/v/release/mrf0rtuna4/Github-Readme-AutoTranslator">
-  <img src="https://img.shields.io/github/actions/workflow/status/mrf0rtuna4/Github-Readme-AutoTranslator/translate-readme.yml">
+  <img src="https://img.shields.io/github/actions/workflow/status/mrf0rtuna4/Github-Readme-AutoTranslator/example.yml">
 </div>
 
 
