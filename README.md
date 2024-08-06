@@ -1,7 +1,7 @@
 # GitHub Readme AutoTranslator
 <div align="center">
   <img src="https://img.shields.io/github/v/release/mrf0rtuna4/Github-Readme-AutoTranslator">
-  <img src="https://img.shields.io/github/actions/workflow/status/mrf0rtuna4/Github-Readme-AutoTranslator/translate-readme.yml">
+  <img src="https://img.shields.io/github/actions/workflow/status/mrf0rtuna4/Github-Readme-AutoTranslator/example.yml">
 </div>
 
 
@@ -38,7 +38,7 @@ jobs:
         uses: actions/checkout@v2  # Using an action to test the code
 
       - name: Run translation  # Step: start the translation
-        uses: mrf0rtuna4/Github-Readme-AutoTranslator@v1.2.0  # Using an action to translate
+        uses: mrf0rtuna4/Github-Readme-AutoTranslator@v1.3.0  # Using an action to translate
         env:
           LANGS: 'english,italian,dutch,spanish' # List of languages to be translated
 
@@ -106,19 +106,19 @@ For example, if you want to generate README files for Serbian, Italian, and Engl
 
 And you can view, how to work action by clicking this widgets:
 <div align="center">
-  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/ru.md">
+  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations_indev/ru.md">
       <img src="https://img.shields.io/badge/Язык-Руский-blue" alt="Руский" />
   </a>
-  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/ja.md">
+  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations_indev/ja.md">
       <img src="https://img.shields.io/badge/言語-日本語-blue" alt="日本語" />
   </a>
-  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/it.md">
+  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations_indev/it.md">
       <img src="https://img.shields.io/badge/Lingua-Italiano-blue" alt="Italiano" />
   </a>
-  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/uk.md">
+  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations_indev/uk.md">
       <img src="https://img.shields.io/badge/Мова-Українська-blue" alt="Українська" />
   </a>
-  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations/ar.md">
+  <a href="https://github.com/mrf0rtuna4/Github-Readme-AutoTranslator/blob/translations_indev/ar.md">
       <img src="https://img.shields.io/badge/لغة-العربية-blue" alt="العربية" />
   </a>
 </div>
