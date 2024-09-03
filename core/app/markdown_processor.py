@@ -32,7 +32,8 @@ class MarkdownProcessor:
         self.placeholder_map = {
             "_BL0CK": [],
             "_L1NK": [],
-            "_HTML": []
+            "_HTML": [],
+            "_MD_WDGT": []
         }
 
     @staticmethod
@@ -52,6 +53,13 @@ class MarkdownProcessor:
             self.placeholder_map["_BL0CK"].append(
                 (unique_placeholder, code_block))
             text = text.replace(code_block, unique_placeholder, 1)
+
+        markdown_widgets = re.findall(r"!\[[^\]]*\]\([^\)]+\)", text)
+        for widget in markdown_widgets:
+            unique_placeholder = self._generate_placeholder("_MD_WDGT")
+            self.placeholder_map["_MD_WDGT"].append(
+                (unique_placeholder, widget))
+            text = text.replace(widget, unique_placeholder, 1)
 
         links = re.findall(r"\[([^]]+)]\(([^)]+)\)", text)
         for link in links:
@@ -78,6 +86,8 @@ class MarkdownProcessor:
             for unique_placeholder, original in mappings:
                 if placeholder_type == "_L1NK":
                     original = f"[{original[0]}]({original[1]})"
+                elif placeholder_type == "_MD_WDGT":
+                    original = original
                 text = text.replace(unique_placeholder, original, 1)
         return text
 
