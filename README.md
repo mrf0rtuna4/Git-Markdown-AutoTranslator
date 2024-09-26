@@ -1,4 +1,4 @@
-# GitHub Readme AutoTranslator
+# GitHub Markdown Files AutoTranslator
 <div align="center">
   <img src="https://img.shields.io/github/v/release/mrf0rtuna4/Github-Readme-AutoTranslator">
   <img src="https://img.shields.io/github/actions/workflow/status/mrf0rtuna4/Github-Readme-AutoTranslator/example.yml">
@@ -10,21 +10,21 @@
 >
 > This may affect the quality of the translation. It may also cause the system to MIS-identify your file data.
 
-This GitHub Action automatically generates and pushes localized versions of your README.md file based on the supported languages.
+This GitHub Action automatically generates and pushes localized versions of your *.md files based on the supported languages.
 
 ## Usage
 
 To use this action, create a workflow file (e.g., `.github/workflows/translate.yml`) in your repository with the following content:
 
 ```yml
-name: Generate Localized Readme  # The name of your action
+name: Generate Localized File  # The name of your action
 
 on:
   workflow_dispatch:  # Manual start
   push:  # Run when committing to a branch
     branches:
     - master # Set the name of your branch if required
-    paths: # Start translating only if readme file changed in current push
+    paths: # Start translating only if file changed in current push
     - 'README.MD'
     - 'README.md'
     - 'readme.md'
@@ -40,6 +40,7 @@ jobs:
       - name: Run translation  # Step: start the translation
         uses: mrf0rtuna4/Github-Readme-AutoTranslator@v1.3.1  # Using an action to translate
         env:
+          FILES: 'README.md' # The *.md files to be translate
           LANGS: 'english,italian,dutch,spanish' # List of languages to be translated
 
       - name: Push to GitHub  # Step: Submit changes to GitHub
@@ -92,15 +93,17 @@ Replace `LANGS` with a comma-separated list of languages you want to generate.
 
 You can configure this action using the following inputs:
 
-- `langs`: A comma-separated list of languages to generate.
+- `FILES`: A comma-separated list of files to translate.
+- `LANGS`: A comma-separated list of languages to generate.
 
 ## Example
 
-For example, if you want to generate README files for Serbian, Italian, and English languages, your configuration would look like this:
+For example, if you want to generate files for Serbian, Italian, and English languages, your configuration would look like this:
 
 ```yml
       - name: Run translation
         env:
+          FILES: 'README.md' 
           LANGS: 'serbian,italian,english'
 ```
 

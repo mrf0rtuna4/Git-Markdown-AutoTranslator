@@ -1,6 +1,6 @@
 """ App methods and classes """
 
-from .localization_manager import LocalizationManager
+from .localizator import LocalizationManager
 from .logger import log_error, log_info
-from .markdown_processor import MarkdownProcessor
-from .readme_handler import ReadmeHandler
+from .processor import Processor
+from .file_handler import FileHandler

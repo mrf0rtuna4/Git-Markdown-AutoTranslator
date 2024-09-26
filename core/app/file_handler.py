@@ -23,38 +23,20 @@ SOFTWARE.
 """
 
 
-class ReadmeHandler:
+class FileHandler:
     def __init__(self, file_path):
         self.file_path = file_path
 
-    def load_readme(self):
-        """
-        Load the README file content.
-
-        :return: Content of the README file.
-        """
+    def load_file(self):
         with open(self.file_path, "r", encoding="utf-8") as file:
             return file.read()
 
-    async def decompile_readme(self, processor):
-        """
-        Decompile the README file using MarkdownProcessor.
-
-        :param processor: MarkdownProcessor instance.
-        :return: Tuple containing the chunks of text and a dictionary with extracted data.
-        """
-        readme_content = self.load_readme()
-        chunks, placeholder_map = processor.decompile_readme(readme_content)
+    async def decompile(self, processor):
+        content = self.load_file()
+        chunks, placeholder_map = processor.decompile_file(content)
         return chunks, placeholder_map
 
     @staticmethod
-    async def build_readme(translated_chunks, processor):
-        """
-        Rebuild the translated chunks into a complete translated README content using MarkdownProcessor.
-
-        :param translated_chunks: List of translated text chunks.
-        :param processor: MarkdownProcessor instance.
-        :return: Translated README content.
-        """
-        translated_content = processor.build_readme(translated_chunks)
+    async def build_file(translated_chunks, processor):
+        translated_content = processor.build_file(translated_chunks)
         return translated_content

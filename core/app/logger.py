@@ -23,8 +23,13 @@ SOFTWARE.
 """
 
 import logging
+import os
+from dotenv import load_dotenv
 
-logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
+load_dotenv()
+logging.basicConfig(level=logging.INFO, format='[%(levelname)s] - %(message)s')
+
+dbg = os.getenv("DEBUG")
 
 
 def log_error(message):
@@ -33,3 +38,11 @@ def log_error(message):
 
 def log_info(message):
     logging.info(message)
+
+
+def log_warn(message):
+    logging.warning(message)
+
+
+def log_dbg(message):
+    logging.debug(message) if dbg == "True" else None
