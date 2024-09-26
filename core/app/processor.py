@@ -54,7 +54,7 @@ class MarkdownProcessor:
                 (unique_placeholder, code_block))
             text = text.replace(code_block, unique_placeholder, 1)
 
-        markdown_widgets = re.findall(r"!\[[^\]]*\]\([^\)]+\)", text)
+        markdown_widgets = re.findall(r"!\[[^]]*]\([^)]+\)", text)
         for widget in markdown_widgets:
             unique_placeholder = self._generate_placeholder("_MD_WDGT")
             self.placeholder_map["_MD_WDGT"].append(
@@ -91,7 +91,7 @@ class MarkdownProcessor:
                 text = text.replace(unique_placeholder, original, 1)
         return text
 
-    def decompile_readme(self, readme_content):
+    def decompile_readme(self, readme_content, *, file=None):
         """
         Decompile the README content into chunks and extract code blocks, links, and HTML tags.
 
@@ -111,7 +111,7 @@ class MarkdownProcessor:
             chunks.append(readme_content[i:end_index])
             i = end_index
 
-        log_info("💠 Decompiled README content into chunks.")
+        log_info(f"💠 Decompiled {file} file content into chunks.")
 
         return chunks, self.placeholder_map
 
