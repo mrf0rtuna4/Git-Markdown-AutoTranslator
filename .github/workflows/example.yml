@@ -19,7 +19,7 @@ jobs:
         uses: mrf0rtuna4/Git-Markdown-AutoTranslator@v2.0.0 # Using an action to translate
         env:
           FILES: 'README.md' # Files List
-          LANGS: 'ru, ar, uk, it, ja, serbian' # List of languages to be translated
+          LANGS: 'ru, ar, uk, it, ja, polish' # List of languages to be translated
 
       - name: Push to GitHub  # Step: Submit changes to GitHub
         uses: crazy-max/ghaction-github-pages@v3.1.0  # Using an action to publish to GitHub Pages
