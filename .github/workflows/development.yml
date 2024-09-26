@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run translation
-        uses: mrf0rtuna4/Github-Readme-AutoTranslator@master
+        uses: mrf0rtuna4/Git-Markdown-AutoTranslator@master
         env:
           LANGS: 'ru, ar, uk, it, ja'
           FILES: 'README.md'
@@ -23,7 +23,7 @@ jobs:
       - name: Push to GitHub
         uses: crazy-max/ghaction-github-pages@v3.1.0
         with:
-          target_branch: translations_indev_ver2
+          target_branch: translations_indev
           build_dir: 'dist'
         env:
           GITHUB_TOKEN: ${{ secrets.GTK }}
