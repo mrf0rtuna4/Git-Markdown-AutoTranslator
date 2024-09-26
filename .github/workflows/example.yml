@@ -1,4 +1,4 @@
-name: Generate Localized Readme  # The name of your action
+name: Generate Localized Files  # The name of your action
 
 on:
   workflow_dispatch:  # Manual start
