@@ -35,10 +35,18 @@ load_dotenv()
 async def main():
     log_info("💚 AutoLocalizator | by mr_f0rtuna4")
     selected_langs = os.getenv("LANGS")
-    if not selected_langs:
-        log_error("❌ LANGS environment variable not set.")
+    files = os.getenv("FILES")
+
+    if not selected_langs or not files:
+        log_error("❌ Environment variable(s) not set. Check the LANGS and FILES in env")
         return
-    manager = LocalizationManager(selected_langs)
+
+    for filename in [file.strip() for file in files.split(",")] if isinstance(files, str) else files:
+        if not filename.endswith(".md"):
+            log_error(f"❌ File {filename} not supported because it's not a markdown file")
+            return
+
+    manager = LocalizationManager(selected_langs, files)
     await manager.update_localizations()
 
 

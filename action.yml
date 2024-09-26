@@ -1,5 +1,5 @@
-name: Generate Localized Readme
-description: Generates localised readme files for your git
+name: Generate Localized Markdown File
+description: Generates localised files for your git
 author: mrf0rtuna4
 branding:
   icon: 'cloud-lightning'

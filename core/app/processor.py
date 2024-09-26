@@ -21,60 +21,51 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+
 import re
 import uuid
 
-from app.logger import log_info, log_error
+from .logger import log_info, log_error, log_dbg
 
 
-class MarkdownProcessor:
+class Processor:
     def __init__(self):
         self.placeholder_map = {
             "_BL0CK": [],
             "_L1NK": [],
             "_HTML": [],
-            "_MD_WDGT": []
+            "_MD_WDGT": [],
+            "_NON_TRANSLATE": []
         }
 
     @staticmethod
     def _generate_placeholder(placeholder):
         """
-        Generate a unique placeholder string.
+        Generate a unique placeholder string without spaces.
         """
-        return f"{placeholder}_{uuid.uuid4().hex}"
+        unique_placeholder = f"{placeholder}_{uuid.uuid4().hex}"
+        return unique_placeholder.replace(" ", "")
 
     def _sanitize_placeholders(self, text):
-        """
-        Ensure placeholders don't conflict with the original content.
-        """
-        code_blocks = re.findall(r"```[\s\S]*?```", text)
-        for code_block in code_blocks:
-            unique_placeholder = self._generate_placeholder("_BL0CK")
-            self.placeholder_map["_BL0CK"].append(
-                (unique_placeholder, code_block))
-            text = text.replace(code_block, unique_placeholder, 1)
+        patterns = {
+            "_BL0CK": r"```[\s\S]*?```",
+            "_MD_WDGT": r"!\[[^]]*]\([^)]+\)",
+            "_L1NK": r"\[([^]]+)]\(([^)]+)\)",
+            "_HTML": r"<.*?>",
+            "_NON_TRANSLATE": r"\[\[.*?\]\]"
+        }
 
-        markdown_widgets = re.findall(r"!\[[^]]*]\([^)]+\)", text)
-        for widget in markdown_widgets:
-            unique_placeholder = self._generate_placeholder("_MD_WDGT")
-            self.placeholder_map["_MD_WDGT"].append(
-                (unique_placeholder, widget))
-            text = text.replace(widget, unique_placeholder, 1)
-
-        links = re.findall(r"\[([^]]+)]\(([^)]+)\)", text)
-        for link in links:
-            unique_placeholder = self._generate_placeholder("_L1NK")
-            self.placeholder_map["_L1NK"].append(
-                (unique_placeholder, link))
-            text = text.replace(
-                f"[{link[0]}]({link[1]})", unique_placeholder, 1)
-
-        html_tags = re.findall(r"<.*?>", text)
-        for html_tag in html_tags:
-            unique_placeholder = self._generate_placeholder("_HTML")
-            self.placeholder_map["_HTML"].append(
-                (unique_placeholder, html_tag))
-            text = text.replace(html_tag, unique_placeholder, 1)
+        for key, pattern in patterns.items():
+            matches = re.findall(pattern, text)
+            for match in matches:
+                unique_placeholder = self._generate_placeholder(key)
+                self.placeholder_map[key].append((unique_placeholder, match))
+                log_dbg(f"Created placeholder: {unique_placeholder} for tag: {key}")
+                if isinstance(match, tuple):
+                    match_str = "".join(match)
+                else:
+                    match_str = match
+                text = text.replace(match_str, unique_placeholder, 1)
 
         return text
 
@@ -84,63 +75,34 @@ class MarkdownProcessor:
         """
         for placeholder_type, mappings in self.placeholder_map.items():
             for unique_placeholder, original in mappings:
-                if placeholder_type == "_L1NK":
-                    original = f"[{original[0]}]({original[1]})"
-                elif placeholder_type == "_MD_WDGT":
-                    original = original
-                text = text.replace(unique_placeholder, original, 1)
+                if unique_placeholder not in text:
+                    log_dbg(f"⚠ Placeholder {unique_placeholder} not found in text.")
+
+                if isinstance(original, tuple):
+                    original_str = "".join(original)
+                else:
+                    original_str = original
+
+                text = text.replace(unique_placeholder, original_str, 1)
         return text
 
-    def decompile_readme(self, readme_content, *, file=None):
-        """
-        Decompile the README content into chunks and extract code blocks, links, and HTML tags.
-
-        :return: Tuple containing the chunks of text and a dictionary with extracted data.
-        """
-        readme_content = self._sanitize_placeholders(readme_content)
-
+    def decompile_file(self, content, *, file=None):
+        content = self._sanitize_placeholders(content)
         chunk_size = 2048
-        chunks = []
-        i = 0
-
-        while i < len(readme_content):
-            end_index = min(i + chunk_size, len(readme_content))
-            if end_index < len(readme_content):
-                while end_index > i and not readme_content[end_index].isspace():
-                    end_index -= 1
-            chunks.append(readme_content[i:end_index])
-            i = end_index
-
+        chunks = [content[i:i + chunk_size] for i in range(0, len(content), chunk_size)]
         log_info(f"💠 Decompiled {file} file content into chunks.")
-
         return chunks, self.placeholder_map
 
-    def build_readme(self, translated_chunks, lang):
-        """
-        Rebuild the translated chunks into a complete translated README content.
-
-        :param translated_chunks: List of translated text chunks.
-        :param lang: Language for build
-        :return: Translated README content.
-        """
-        translated_content = " ".join(translated_chunks)
-        log_info(f"📦 Let's start rebuilding translated content for {lang}.md")
-
+    def build_file(self, translated_chunks, lang, *, file=None):
+        translated_content = "".join(translated_chunks)
+        log_info(f"📦 Let's start rebuilding translated content for {lang}_{file}")
         translated_content = self._restore_placeholders(translated_content)
         return translated_content
 
     def post_check_placeholders(self, translated_content):
-        """
-        Post-check for any remaining placeholders.
-
-        :param translated_content: Translated README content.
-        :return: None
-        """
         remaining_placeholders = [ph for mappings in self.placeholder_map.values()
                                   for ph, _ in mappings if ph in translated_content]
         if remaining_placeholders:
-            log_error(
-                f"❌ Error: Not all placeholders were replaced. Remaining placeholders: {remaining_placeholders}")
-            log_error(
-                f"Translated content after attempting to restore placeholders: {translated_content}")
+            log_error(f"❌ Error: Not all placeholders were replaced. Remaining placeholders: {remaining_placeholders}")
+            log_error(f"Translated content after attempting to restore placeholders: {translated_content}")
             raise ValueError("Not all placeholders were replaced.")

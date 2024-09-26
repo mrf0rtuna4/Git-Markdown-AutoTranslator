@@ -1,43 +1,38 @@
-"""
-MIT License
+#  MIT License
+#
+#  Copyright (c) 2024. Mr_Fortuna
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a copy
+#  of this software and associated documentation files (the "Software"), to deal
+#  in the Software without restriction, including without limitation the rights
+#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+#  copies of the Software, and to permit persons to whom the Software is
+#  furnished to do so, subject to the following conditions:
+#
+#  The above copyright notice and this permission notice shall be included in all
+#  copies or substantial portions of the Software.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+#  SOFTWARE.
 
-Copyright (c) 2024 Mr_Fortuna
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-"""
 import asyncio
 import os
 
 from app.logger import log_info, log_error
-from app.markdown_processor import MarkdownProcessor
+from app.processor import Processor
 from deep_translator import GoogleTranslator
 
 
 class LocalizationManager:
     def __init__(self, langs, files, dist_dir="dist"):
-        if isinstance(files, str):
-            self.files = [file.strip() for file in files.split(",")]
-        else:
-            self.files = files if isinstance(files, list) else [files]
-
+        self.files = [file.strip() for file in files.split(",")] if isinstance(files, str) else files
         self.langs = [lang.strip() for lang in langs.split(",")]
-        self.processor = MarkdownProcessor()
+        self.processor = Processor()
         self.dist_dir = dist_dir
 
     @staticmethod
@@ -50,11 +45,10 @@ class LocalizationManager:
             raise
 
     async def process_file(self, file_path):
-        # log_info(f"Processing file: {file_path}")
         with open(file_path, "r", encoding="utf-8") as file:
             content = file.read()
 
-        chunks, _ = self.processor.decompile_readme(content, file=file_path)
+        chunks, _ = self.processor.decompile_file(content, file=file_path)
         translations = {lang: [] for lang in self.langs}
 
         for chunk in chunks:
@@ -64,7 +58,7 @@ class LocalizationManager:
                 translations[lang].append(translated_chunk)
 
         for lang, translated_chunks in translations.items():
-            translated_content = self.processor.build_readme(translated_chunks, lang)
+            translated_content = self.processor.build_file(translated_chunks, lang, file=file_path)
             self.processor.post_check_placeholders(translated_content)
             await self.write_to_file(file_path, lang, translated_content)
 
@@ -78,7 +72,7 @@ class LocalizationManager:
                 file.write(content)
             log_info(f"⌛ File saved: {file_path}")
         except Exception as e:
-            log_error(f"Failed to write file for {lang}: {str(e)}")
+            log_error(f"💥 Failed to write file for {lang} ({file_path}): {str(e)}")
             raise
 
     async def update_localizations(self):
