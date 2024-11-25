@@ -106,7 +106,7 @@ class Processor:
 
 
     def build_file(self, translated_lines, placeholder_map, lang, *, file=None):
-        translated_content = "\n".join(translated_lines)
+        translated_content = "\n".join(line if line is not None else "" for line in translated_lines)
         log_info(f"📦 Rebuilding translated content for {lang}_{file}")
         translated_content = self._restore_placeholders(translated_content, placeholder_map)
         return translated_content
