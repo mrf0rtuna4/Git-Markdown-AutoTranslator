@@ -92,6 +92,13 @@ You can configure this action using the following inputs:
 
 - `FILES`: A comma-separated list of files to translate.
 - `LANGS`: A comma-separated list of languages to generate.
+- `DEBUG`: Set to `True` to enable detailed logging of the translation process. This is useful for troubleshooting but may generate verbose output.
+- `MAX_LINELENGTH_`: Specifies the maximum allowed line length for translation. **Use with caution!** Setting this value too low can cause errors or incomplete translations.
+
+> [WARNING] 
+> Avoid using `MAX_LINELENGTH_` without fully understanding its implications. 
+> Improper configuration (e.g., a very low value) may lead to unexpected behavior or translation failures.
+
 
 ## Example
 

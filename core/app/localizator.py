@@ -55,6 +55,16 @@ class LocalizationManager:
         translations = {lang: [] for lang in self.langs}
 
         for line in lines:
+            is_placeholder_only = all(
+                any(placeholder in line for placeholders in self.processor.placeholder_map.values() for placeholder, _ in placeholders)
+                for _ in line.split()
+            )
+
+            if not line.strip() or is_placeholder_only:
+                for lang in self.langs:
+                    translations[lang].append(line)
+                continue
+
             translation_tasks = [self.translate_text(line, lang) for lang in self.langs]
             translated_lines = await asyncio.gather(*translation_tasks)
             for lang, translated_line in zip(self.langs, translated_lines):
@@ -66,6 +76,7 @@ class LocalizationManager:
             )
             self.processor.post_check_placeholders(translated_content)
             await self.write_to_file(file_path, lang, translated_content)
+
 
 
     async def write_to_file(self, original_file, lang, content):
