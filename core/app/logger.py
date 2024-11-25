@@ -27,9 +27,15 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-logging.basicConfig(level=logging.INFO, format='[%(levelname)s] - %(message)s')
 
 dbg = os.getenv("DEBUG")
+level = logging.INFO
+
+if dbg == "True":
+    level = logging.DEBUG
+
+
+logging.basicConfig(level=level, format='[%(levelname)s]: %(message)s')
 
 
 def log_error(message):
@@ -45,4 +51,4 @@ def log_warn(message):
 
 
 def log_dbg(message):
-    logging.debug(message) if dbg == "True" else None
+    logging.debug(message) 
