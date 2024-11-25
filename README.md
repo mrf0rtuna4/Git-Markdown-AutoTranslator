@@ -35,7 +35,7 @@ jobs:
         uses: actions/checkout@v2  # Using an action to test the code
 
       - name: Run translation  # Step: start the translation
-        uses: mrf0rtuna4/Git-Markdown-AutoTranslator@v2.0.0  # Using an action to translate
+        uses: mrf0rtuna4/Git-Markdown-AutoTranslator@v2.1.0  # Using an action to translate
         env:
           FILES: 'README.md' # The *.md files to be translate
           LANGS: 'english,italian,dutch,spanish' # List of languages to be translated
