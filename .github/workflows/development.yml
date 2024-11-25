@@ -18,7 +18,7 @@ jobs:
         uses: mrf0rtuna4/Git-Markdown-AutoTranslator@master
         env:
           LANGS: 'ru, ar, uk, it, ja'
-          FILES: 'README.md, https://github.com/mrf0rtuna4/mrf0rtuna4/blob/main/README.md'
+          FILES: 'README.md'
 
       - name: Push to GitHub
         uses: crazy-max/ghaction-github-pages@v3.1.0
