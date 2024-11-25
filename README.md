@@ -51,7 +51,9 @@ jobs:
 
 Replace `LANGS` with a comma-separated list of languages you want to generate.
 <details>
-<summary>Available languages for translation (complete references)</summary>
+<summary>
+  Available languages for translation (complete references)
+</summary>
 
 ```yaml
     'afrikaans', 'albanian', 'amharic', 'arabic', 'armenian', 'assamese', 'aymara', 'azerbaijani', 'bambara', 'basque', 
@@ -71,7 +73,9 @@ Replace `LANGS` with a comma-separated list of languages you want to generate.
 </details>
 
 <details>
-<summary>Available languages for translation (short addresses)</summary>
+<summary>
+  Available languages for translation (short addresses)
+</summary>
 
 ```yaml
 'af', 'sq', 'am', 'ar', 'hy', 'as', 'ay', 'az', 'bm', 'eu', 'be', 'bn', 'bho', 'bs', 'bg', 'ca', 'ceb', 'ny',
@@ -95,7 +99,7 @@ You can configure this action using the following inputs:
 - `DEBUG`: Set to `True` to enable detailed logging of the translation process. This is useful for troubleshooting but may generate verbose output.
 - `MAX_LINELENGTH_`: Specifies the maximum allowed line length for translation. **Use with caution!** Setting this value too low can cause errors or incomplete translations.
 
-> [WARNING] 
+> [!WARNING] 
 > Avoid using `MAX_LINELENGTH_` without fully understanding its implications. 
 > Improper configuration (e.g., a very low value) may lead to unexpected behavior or translation failures.
 
