@@ -41,9 +41,6 @@ class Processor:
 
     @staticmethod
     def _generate_placeholder(placeholder):
-        """
-        Generate a unique placeholder string without spaces.
-        """
         unique_placeholder = f"{placeholder}_{uuid.uuid4().hex}"
         return unique_placeholder.replace(" ", "")
 
@@ -73,10 +70,7 @@ class Processor:
                 unique_placeholder = self._generate_placeholder(key)
                 placeholder_map[key].append((unique_placeholder, match))
                 log_dbg(f"Created placeholder: {unique_placeholder} for tag: {key}")
-                if isinstance(match, tuple):
-                    match_str = "".join(match)
-                else:
-                    match_str = match
+                match_str = "".join(match) if isinstance(match, tuple) else match
                 text = text.replace(match_str, unique_placeholder, 1)
 
         return text
@@ -87,35 +81,37 @@ class Processor:
             for unique_placeholder, original in mappings:
                 if unique_placeholder not in text:
                     log_dbg(f"⚠ Placeholder {unique_placeholder} not found in text.")
-
-                if isinstance(original, tuple):
-                    original_str = "".join(original)
-                else:
-                    original_str = original
-
+                original_str = "".join(original) if isinstance(original, tuple) else original
                 text = text.replace(unique_placeholder, original_str, 1)
         return text
 
 
-    def decompile_file(self, content, *, file=None):
+    def decompile_file(self, content, *, file=None, max_line_length=500):
         content = self._sanitize_placeholders(content, self.placeholder_map)
-        chunk_size = 2048
-        chunks = [content[i:i + chunk_size] for i in range(0, len(content), chunk_size)]
-        log_info(f"💠 Decompiled {file} file content into chunks.")
-        return chunks, self.placeholder_map
+        lines = content.splitlines()
+        processed_lines = []
+
+        for line in lines:
+            while len(line) > max_line_length:
+                processed_lines.append(line[:max_line_length])
+                line = line[max_line_length:]
+            processed_lines.append(line)
+
+        log_info(f"💠 Decompiled {file} content into lines.")
+        return processed_lines, self.placeholder_map
 
 
-    def build_file(self, translated_chunks, placeholder_map, lang, *, file=None):
-        translated_content = "".join(translated_chunks)
-        log_info(f"📦 Let's start rebuilding translated content for {lang}_{file}")
+    def build_file(self, translated_lines, placeholder_map, lang, *, file=None):
+        translated_content = "\n".join(translated_lines)
+        log_info(f"📦 Rebuilding translated content for {lang}_{file}")
         translated_content = self._restore_placeholders(translated_content, placeholder_map)
         return translated_content
-
+        
 
     def post_check_placeholders(self, translated_content):
         remaining_placeholders = [ph for mappings in self.placeholder_map.values()
                                   for ph, _ in mappings if ph in translated_content]
         if remaining_placeholders:
-            log_error(f"❌ Error: Not all placeholders were replaced. Remaining placeholders: {remaining_placeholders}")
-            log_error(f"Translated content after attempting to restore placeholders: {translated_content}")
+            log_error(f"❌ Not all placeholders were replaced. Remaining: {remaining_placeholders}")
+            log_error(f"Translated content: {translated_content}")
             raise ValueError("Not all placeholders were replaced.")

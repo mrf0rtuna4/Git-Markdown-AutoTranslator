@@ -36,6 +36,7 @@ async def main():
     log_info("💚 AutoLocalizator | by mrf0rtuna4")
     selected_langs = os.getenv("LANGS")
     files = os.getenv("FILES")
+    max_line_length = os.getenv("MAX_LINELENTH_")
 
     if not selected_langs or not files:
         log_error("❌ Environment variable(s) not set. Check the LANGS and FILES in env")
@@ -46,7 +47,7 @@ async def main():
             log_error(f"❌ File {filename} not supported because it's not a markdown file")
             return
 
-    manager = LocalizationManager(selected_langs, files)
+    manager = LocalizationManager(selected_langs, files, int(max_line_length))
     await manager.update_localizations()
 
 

@@ -29,9 +29,10 @@ from deep_translator import GoogleTranslator
 
 
 class LocalizationManager:
-    def __init__(self, langs, files, dist_dir="dist"):
+    def __init__(self, langs, files, max_line_length: int, dist_dir="dist"):
         self.files = [file.strip() for file in files.split(",")] if isinstance(files, str) else files
         self.langs = [lang.strip() for lang in langs.split(",")]
+        self.max_line_length = max_line_length
         self.processor = Processor()
         self.dist_dir = dist_dir
 
@@ -50,24 +51,21 @@ class LocalizationManager:
         with open(file_path, "r", encoding="utf-8") as file:
             content = file.read()
 
-        chunks, placeholder_map = self.processor.decompile_file(content, file=file_path)
+        lines, placeholder_map = self.processor.decompile_file(content, file=file_path, max_line_length=self.max_line_length)
         translations = {lang: [] for lang in self.langs}
 
-        for chunk in chunks:
-            translation_tasks = [self.translate_text(chunk, lang) for lang in self.langs]
-            translated_chunks = await asyncio.gather(*translation_tasks)
-            for lang, translated_chunk in zip(self.langs, translated_chunks):
-                translations[lang].append(translated_chunk)
+        for line in lines:
+            translation_tasks = [self.translate_text(line, lang) for lang in self.langs]
+            translated_lines = await asyncio.gather(*translation_tasks)
+            for lang, translated_line in zip(self.langs, translated_lines):
+                translations[lang].append(translated_line)
 
-        for lang, translated_chunks in translations.items():
+        for lang, translated_lines in translations.items():
             translated_content = self.processor.build_file(
-                translated_chunks, placeholder_map, lang, file=file_path
+                translated_lines, placeholder_map, lang, file=file_path
             )
-            
             self.processor.post_check_placeholders(translated_content)
-
             await self.write_to_file(file_path, lang, translated_content)
-
 
 
     async def write_to_file(self, original_file, lang, content):
