@@ -38,6 +38,7 @@ class Processor:
             "_NON_TRANSLATE": []
         }
 
+
     @staticmethod
     def _generate_placeholder(placeholder):
         """
@@ -46,7 +47,18 @@ class Processor:
         unique_placeholder = f"{placeholder}_{uuid.uuid4().hex}"
         return unique_placeholder.replace(" ", "")
 
-    def _sanitize_placeholders(self, text):
+
+    def clear_placeholder_map(self):
+        self.placeholder_map = {
+            "_BL0CK": [],
+            "_L1NK": [],
+            "_HTML": [],
+            "_MD_WDGT": [],
+            "_NON_TRANSLATE": []
+        }
+
+
+    def _sanitize_placeholders(self, text, placeholder_map):
         patterns = {
             "_BL0CK": r"```[\s\S]*?```",
             "_MD_WDGT": r"!\[[^]]*]\([^)]+\)",
@@ -59,7 +71,7 @@ class Processor:
             matches = re.findall(pattern, text)
             for match in matches:
                 unique_placeholder = self._generate_placeholder(key)
-                self.placeholder_map[key].append((unique_placeholder, match))
+                placeholder_map[key].append((unique_placeholder, match))
                 log_dbg(f"Created placeholder: {unique_placeholder} for tag: {key}")
                 if isinstance(match, tuple):
                     match_str = "".join(match)
@@ -69,11 +81,9 @@ class Processor:
 
         return text
 
-    def _restore_placeholders(self, text):
-        """
-        Restore placeholders to their original form.
-        """
-        for placeholder_type, mappings in self.placeholder_map.items():
+
+    def _restore_placeholders(self, text, placeholder_map):
+        for placeholder_type, mappings in placeholder_map.items():
             for unique_placeholder, original in mappings:
                 if unique_placeholder not in text:
                     log_dbg(f"⚠ Placeholder {unique_placeholder} not found in text.")
@@ -86,18 +96,21 @@ class Processor:
                 text = text.replace(unique_placeholder, original_str, 1)
         return text
 
+
     def decompile_file(self, content, *, file=None):
-        content = self._sanitize_placeholders(content)
+        content = self._sanitize_placeholders(content, self.placeholder_map)
         chunk_size = 2048
         chunks = [content[i:i + chunk_size] for i in range(0, len(content), chunk_size)]
         log_info(f"💠 Decompiled {file} file content into chunks.")
         return chunks, self.placeholder_map
 
-    def build_file(self, translated_chunks, lang, *, file=None):
+
+    def build_file(self, translated_chunks, placeholder_map, lang, *, file=None):
         translated_content = "".join(translated_chunks)
         log_info(f"📦 Let's start rebuilding translated content for {lang}_{file}")
-        translated_content = self._restore_placeholders(translated_content)
+        translated_content = self._restore_placeholders(translated_content, placeholder_map)
         return translated_content
+
 
     def post_check_placeholders(self, translated_content):
         remaining_placeholders = [ph for mappings in self.placeholder_map.values()

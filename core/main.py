@@ -33,7 +33,7 @@ load_dotenv()
 
 
 async def main():
-    log_info("💚 AutoLocalizator | by mr_f0rtuna4")
+    log_info("💚 AutoLocalizator | by mrf0rtuna4")
     selected_langs = os.getenv("LANGS")
     files = os.getenv("FILES")
 

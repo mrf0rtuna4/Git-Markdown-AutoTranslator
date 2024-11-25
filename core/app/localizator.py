@@ -35,6 +35,7 @@ class LocalizationManager:
         self.processor = Processor()
         self.dist_dir = dist_dir
 
+
     @staticmethod
     async def translate_text(text, lang):
         translator = GoogleTranslator(source='auto', target=lang)
@@ -44,11 +45,12 @@ class LocalizationManager:
             log_error(f"Translation failed for {lang}: {str(e)}")
             raise
 
+
     async def process_file(self, file_path):
         with open(file_path, "r", encoding="utf-8") as file:
             content = file.read()
 
-        chunks, _ = self.processor.decompile_file(content, file=file_path)
+        chunks, placeholder_map = self.processor.decompile_file(content, file=file_path)
         translations = {lang: [] for lang in self.langs}
 
         for chunk in chunks:
@@ -58,9 +60,15 @@ class LocalizationManager:
                 translations[lang].append(translated_chunk)
 
         for lang, translated_chunks in translations.items():
-            translated_content = self.processor.build_file(translated_chunks, lang, file=file_path)
+            translated_content = self.processor.build_file(
+                translated_chunks, placeholder_map, lang, file=file_path
+            )
+            
             self.processor.post_check_placeholders(translated_content)
+
             await self.write_to_file(file_path, lang, translated_content)
+
+
 
     async def write_to_file(self, original_file, lang, content):
         base_name = os.path.basename(original_file)
@@ -74,6 +82,7 @@ class LocalizationManager:
         except Exception as e:
             log_error(f"💥 Failed to write file for {lang} ({file_path}): {str(e)}")
             raise
+
 
     async def update_localizations(self):
         tasks = [self.process_file(file_path) for file_path in self.files]

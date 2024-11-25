@@ -4,3 +4,4 @@ venv
 /dist
 .env
 __pycache__
+DEVTEST.md
