@@ -92,14 +92,17 @@ class Processor:
         processed_lines = []
 
         for line in lines:
+            if not line.strip():
+                processed_lines.append("")
+                continue
+
             while len(line) > max_line_length:
                 split_point = max_line_length
                 if " " in line[:max_line_length]:
                     split_point = line[:max_line_length].rfind(" ")
                 processed_lines.append(line[:split_point])
                 line = line[split_point:].strip()
-            if line:
-                processed_lines.append(line)
+            processed_lines.append(line)
 
         log_info(f"💠 Decompiled {file} into {len(processed_lines)} lines.")
         return processed_lines, self.placeholder_map
