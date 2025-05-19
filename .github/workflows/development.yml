@@ -15,13 +15,13 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run translation
-        uses: mrf0rtuna4/Git-Markdown-AutoTranslator@master
-        env:
+        uses: mrf0rtuna4/Git-Markdown-AutoTranslator@v2
+        with:
           LANGS: 'ru, ar, uk, it, ja'
           FILES: 'README.md'
 
       - name: Push to GitHub
-        uses: crazy-max/ghaction-github-pages@v3.1.0
+        uses: crazy-max/ghaction-github-pages@v3
         with:
           target_branch: translations_indev
           build_dir: 'dist'

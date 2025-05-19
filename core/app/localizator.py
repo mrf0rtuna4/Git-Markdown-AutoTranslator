@@ -29,10 +29,11 @@ from deep_translator import GoogleTranslator
 
 
 class LocalizationManager:
-    def __init__(self, langs, files, max_line_length: int = 500, dist_dir="dist"):
+    def __init__(self, langs, files, max_line_length: int = 500, max_threads: int = 5, dist_dir="dist"):
         self.files = [file.strip() for file in files.split(",")] if isinstance(files, str) else files
         self.langs = [lang.strip() for lang in langs.split(",")]
         self.max_line_length = max_line_length
+        self.max_threads = max_threads # TODO: 
         self.processor = Processor()
         self.dist_dir = dist_dir
 

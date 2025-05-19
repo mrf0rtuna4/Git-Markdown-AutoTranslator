@@ -1,10 +1,12 @@
-FROM python:3.8
-COPY requirements.txt /requirements.txt
+FROM python:3.9.16-slim AS builder
 
-RUN pip install -r requirements.txt
+RUN useradd --create-home appuser
+WORKDIR /home/appuser
+USER appuser
+
+COPY requirements.txt /requirements.txt
+RUN pip install --no-cache-dir -r /requirements.txt
 
 COPY core ./core
 
-COPY ./core/app/*.py ./core/app/
-
-ENTRYPOINT ["python", "/core/main.py"]
+ENTRYPOINT ["python", "core/main.py"]

@@ -4,6 +4,33 @@ author: mrf0rtuna4
 branding:
   icon: 'cloud-lightning'
   color: 'green'
+inputs:
+  files:
+    description: 'Шаблон файлов для перевода (glob)'
+    required: true
+    default: 'README.md'
+  langs:
+    description: 'Список языков через запятую'
+    required: true
+    default: 'en,ru'
+  debug:
+    description: 'Включить подробный лог'
+    required: false
+    default: 'false'
+  max_threads:
+    description: 'Максимальное число потоков для перевода'
+    required: false
+    default: '5'
+  max_line_length:
+    description: 'Максимальная длина строки'
+    required: false
+    default: '500'
 runs:
   using: 'docker'
   image: 'Dockerfile'
+  args:
+    - ${{ inputs.files }}
+    - ${{ inputs.langs }}
+    - ${{ inputs.debug }}
+    - ${{ inputs.max_threads }}
+    - ${{ inputs.max_line_length }}

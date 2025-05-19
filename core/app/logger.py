@@ -31,7 +31,7 @@ load_dotenv()
 dbg = os.getenv("DEBUG")
 level = logging.INFO
 
-if dbg == "True":
+if dbg == "True" or "true" or True:
     level = logging.DEBUG
 
 

@@ -20,13 +20,11 @@ To use this action, create a workflow file (e.g., `.github/workflows/translate.y
 name: Generate Localized File  # The name of your action
 
 on:
-  workflow_dispatch:  # Manual start
+  workflow_dispatch:  # Manual start (if needs)
   push:  # Run when committing to a branch
-    branches:
-    - master # Set the name of your branch if required
-    paths: # Start translating only if file changed in current push
-    - 'README.md'
-
+    branches: [ main ] # Set the name of your branch if required
+    paths: [ 'README.md' ] # Start translating only if file changed in current push
+    
 jobs:
   translate:  # Task name
     runs-on: ubuntu-latest  # Running on an Ubuntu image
@@ -35,7 +33,7 @@ jobs:
         uses: actions/checkout@v2  # Using an action to test the code
 
       - name: Run translation  # Step: start the translation
-        uses: mrf0rtuna4/Git-Markdown-AutoTranslator@v2.1.0  # Using an action to translate
+        uses: mrf0rtuna4/Git-Markdown-AutoTranslator@v2  # Using an action to translate
         env:
           FILES: 'README.md' # The *.md files to be translate
           LANGS: 'english,italian,dutch,spanish' # List of languages to be translated

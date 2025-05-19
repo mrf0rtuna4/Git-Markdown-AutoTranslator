@@ -24,6 +24,8 @@ SOFTWARE.
 
 import asyncio
 import os
+import sys
+
 
 from dotenv import load_dotenv
 
@@ -31,28 +33,30 @@ from app import LocalizationManager, log_info, log_error
 
 load_dotenv()
 
-
 async def main():
     log_info("💚 AutoLocalizator | by mrf0rtuna4")
-    selected_langs = os.getenv("LANGS")
-    files = os.getenv("FILES")
-    max_line_length = os.getenv("MAX_LINELENTH_")
+    try:
+        files, langs, debug, max_threads, max_line_length = sys.argv[1:6]
+    except ValueError:
+        log_error("❌ Invalid arguments. Usage: <files> <langs> <debug> <max_threads> <max_line_length>")
+        sys.exit(1)
 
-    if not selected_langs or not files:
-        log_error("❌ Environment variable(s) not set. Check the LANGS and FILES in env")
-        return
+    if debug.lower() == 'true':
+        import logging
+        logging.getLogger().setLevel(logging.DEBUG)
 
-    for filename in [file.strip() for file in files.split(",")] if isinstance(files, str) else files:
-        if not filename.endswith(".md"):
-            log_error(f"❌ File {filename} not supported because it's not a markdown file")
-            return
+    for fn in [f.strip() for f in files.split(',')]:
+        if not fn.endswith('.md'):
+            log_error(f"❌ File {fn} is not a markdown file")
+            sys.exit(1)
 
-    if max_line_length is None:
-        max_line_length = 500
-
-    manager = LocalizationManager(selected_langs, files, int(max_line_length))
+    manager = LocalizationManager(
+        langs=langs,
+        files=files,
+        max_line_length=int(max_line_length),
+        max_threads=int(max_threads)
+    )
     await manager.update_localizations()
 
-
-if __name__ == "__main__":
+if __name__ == '__main__':
     asyncio.run(main())
