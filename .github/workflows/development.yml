@@ -15,7 +15,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run translation
-        uses: mrf0rtuna4/Git-Markdown-AutoTranslator@v2
+        uses: mrf0rtuna4/Git-Markdown-AutoTranslator@master
         with:
           LANGS: 'ru, ar, uk, it, ja'
           FILES: 'README.md'
