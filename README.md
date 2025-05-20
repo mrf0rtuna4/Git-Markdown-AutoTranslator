@@ -8,7 +8,6 @@
 
 > [!WARNING]
 > We only use TRANSLATION DeepL
->
 > This may affect the quality of the translation. It may also cause the system to MIS-identify your file data.
 
 This GitHub Action automatically generates and pushes localized versions of your **markdown** files based on the supported languages.
@@ -34,8 +33,8 @@ jobs:
         uses: actions/checkout@v2  # Using an action to test the code
 
       - name: Run translation  # Step: start the translation
-        uses: mrf0rtuna4/Git-Markdown-AutoTranslator@v2  # Using an action to translate
-        env:
+        uses: mrf0rtuna4/Git-Markdown-AutoTranslator@v2.2.0  # Using an action to translate
+        with:
           FILES: 'README.md' # The *.md files to be translate
           LANGS: 'english,italian,dutch,spanish' # List of languages to be translated
 
@@ -96,7 +95,8 @@ You can configure this action using the following inputs:
 - `FILES`: A comma-separated list of files to translate.
 - `LANGS`: A comma-separated list of languages to generate.
 - `DEBUG`: Set to `True` to enable detailed logging of the translation process. This is useful for troubleshooting but may generate verbose output.
-- `MAX_LINELENGTH_`: Specifies the maximum allowed line length for translation. **Use with caution!** Setting this value too low can cause errors or incomplete translations.
+- `MAX_LINELENGTH_`: Specifies the maximum allowed line length for translation. **Use with caution!** Setting this value too low can cause errors or incomplete translations. (Default: 500)
+- `MAX_THREADS`: Allows you to control the maximum number of threads of the translation process. (Default: 5)
 
 > [!WARNING] 
 > Avoid using `MAX_LINELENGTH_` without fully understanding its implications. 

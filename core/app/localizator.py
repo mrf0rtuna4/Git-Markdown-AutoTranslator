@@ -33,26 +33,26 @@ class LocalizationManager:
         self.files = [file.strip() for file in files.split(",")] if isinstance(files, str) else files
         self.langs = [lang.strip() for lang in langs.split(",")]
         self.max_line_length = max_line_length
-        self.max_threads = max_threads # TODO: 
+        self.max_threads = max_threads  # TODO:
+        self.semaphore = asyncio.Semaphore(max_threads)
         self.processor = Processor()
         self.dist_dir = dist_dir
 
-
-    @staticmethod
-    async def translate_text(text, lang):
-        translator = GoogleTranslator(source='auto', target=lang)
-        try:
-            return translator.translate(text)
-        except Exception as e:
-            log_error(f"Translation failed for {lang}: {str(e)}")
-            raise
-
+    async def translate_text(self, text, lang):
+        async with self.semaphore:
+            translator = GoogleTranslator(source='auto', target=lang)
+            try:
+                return translator.translate(text)
+            except Exception as e:
+                log_error(f"Translation failed for {lang}: {str(e)}")
+                raise
 
     async def process_file(self, file_path):
         with open(file_path, "r", encoding="utf-8") as file:
             content = file.read()
 
-        lines, placeholder_map = self.processor.decompile_file(content, file=file_path, max_line_length=self.max_line_length)
+        lines, placeholder_map = self.processor.decompile_file(content, file=file_path,
+                                                               max_line_length=self.max_line_length)
         translations = {lang: [] for lang in self.langs}
 
         for line in lines:
@@ -62,7 +62,8 @@ class LocalizationManager:
                 continue
 
             is_placeholder_only = all(
-                any(placeholder in line for placeholders in self.processor.placeholder_map.values() for placeholder, _ in placeholders)
+                any(placeholder in line for placeholders in self.processor.placeholder_map.values() for placeholder, _
+                    in placeholders)
                 for _ in line.split()
             )
 
@@ -76,15 +77,12 @@ class LocalizationManager:
             for lang, translated_line in zip(self.langs, translated_lines):
                 translations[lang].append(translated_line)
 
-
         for lang, translated_lines in translations.items():
             translated_content = self.processor.build_file(
                 translated_lines, placeholder_map, lang, file=file_path
             )
             self.processor.post_check_placeholders(translated_content)
             await self.write_to_file(file_path, lang, translated_content)
-
-
 
     async def write_to_file(self, original_file, lang, content):
         base_name = os.path.basename(original_file)
@@ -98,7 +96,6 @@ class LocalizationManager:
         except Exception as e:
             log_error(f"💥 Failed to write file for {lang} ({file_path}): {str(e)}")
             raise
-
 
     async def update_localizations(self):
         tasks = [self.process_file(file_path) for file_path in self.files]
