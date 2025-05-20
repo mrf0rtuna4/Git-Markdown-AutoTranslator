@@ -66,11 +66,10 @@ class Processor:
             matches = re.findall(pattern, text)
             for match in matches:
                 unique_placeholder = self._generate_placeholder(key)
-                placeholder_map[key].append((unique_placeholder, match))
-                log_dbg(f"Created placeholder: {unique_placeholder} for tag: {key}")
                 match_str = "".join(match) if isinstance(match, tuple) else match
+                placeholder_map[key].append((unique_placeholder, match_str))
+                log_dbg(f"Created placeholder: {unique_placeholder} for tag: {key}")
                 text = text.replace(match_str, unique_placeholder, 1)
-
         return text
 
     @staticmethod
