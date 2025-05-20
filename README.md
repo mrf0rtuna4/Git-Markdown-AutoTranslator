@@ -109,7 +109,7 @@ For example, if you want to generate files for Serbian, Italian, and English lan
 
 ```yml
       - name: Run translation
-        env:
+        with:
           FILES: 'README.md' 
           LANGS: 'italian,english'
 ```
