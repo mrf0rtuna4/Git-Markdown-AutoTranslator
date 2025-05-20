@@ -78,7 +78,7 @@ class Processor:
         return lines, self.placeholder_map
 
     def build_file(self, translated_lines, placeholder_map, lang, *, file=None):
-        content = '\n'.join(translated_lines if not None else '')
+        content = '\n'.join(line if line is not None else '' for line in translated_lines)
         log_info(f"📦 Rebuilding {lang}_{file}")
         text = self._restore_placeholders(content, placeholder_map)
         text = re.sub(r"(\*\*|__)[ \t]*(.*?)[ \t]*(\1)", r"\1\2\1", text)
