@@ -11,7 +11,7 @@
 >
 > This may affect the quality of the translation. It may also cause the system to MIS-identify your file data.
 
-This GitHub Action automatically generates and pushes localized versions of your *.md files based on the supported languages.
+This GitHub Action automatically generates and pushes localized versions of your **markdown** files based on the supported languages.
 
 ## Usage
 

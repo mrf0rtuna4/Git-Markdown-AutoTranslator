@@ -4,8 +4,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: rhysd/actionlint@v1
+      - uses: actions/checkout@v4
+      - uses: rhysd/actionlint@v1.1.7
       - name: Check Dockerfile
         run: hadolint Dockerfile
       - name: Run tests

@@ -1,7 +1,7 @@
 """
 MIT License
 
-Copyright (c) 2024 Mr_Fortuna
+Copyright (c) 2024-2025 Mr_Fortuna
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -31,7 +31,7 @@ load_dotenv()
 dbg = os.getenv("DEBUG")
 level = logging.INFO
 
-if dbg == "True" or "true" or True:
+if dbg == "True" or "true":
     level = logging.DEBUG
 
 

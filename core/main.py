@@ -1,7 +1,7 @@
 """
 MIT License
 
-Copyright (c) 2024 Mr_Fortuna
+Copyright (c) 2024-2025 Mr_Fortuna
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -23,15 +23,14 @@ SOFTWARE.
 """
 
 import asyncio
-import os
 import sys
-
 
 from dotenv import load_dotenv
 
 from app import LocalizationManager, log_info, log_error
 
 load_dotenv()
+
 
 async def main():
     log_info("💚 AutoLocalizator | by mrf0rtuna4")
@@ -57,6 +56,7 @@ async def main():
         max_threads=int(max_threads)
     )
     await manager.update_localizations()
+
 
 if __name__ == '__main__':
     asyncio.run(main())

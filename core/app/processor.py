@@ -1,7 +1,7 @@
 """
 MIT License
 
-Copyright (c) 2024 Mr_Fortuna
+Copyright (c) 2024-2025 Mr_Fortuna
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -24,6 +24,7 @@ SOFTWARE.
 
 import re
 import uuid
+
 from .logger import log_info, log_error, log_dbg
 
 
@@ -32,7 +33,8 @@ class Processor:
         self.placeholder_map = {key: [] for key in (
             '_BL0CK', '_L1NK', '_HTML', '_MD_WDGT', '_NON_TRANSLATE')}
 
-    def _generate_placeholder(self, prefix):
+    @staticmethod
+    def _generate_placeholder(prefix):
         return f"{prefix}_{uuid.uuid4().hex}"
 
     def clear_placeholder_map(self):
@@ -40,21 +42,39 @@ class Processor:
 
     def _sanitize_placeholders(self, text, placeholder_map):
         patterns = {
-            '_BL0CK': r'```[\s\S]*?```',
-            '_MD_WDGT': r'!\[[^]]*]\([^)]*\)',
-            '_L1NK': r'\[[^]]+]\([^)]*\)',
-            '_HTML': r'<.*?>',
-            '_NON_TRANSLATE': r'\[\[.*?\]\]'
+            "_BL0CK": r"```[\s\S]*?```",
+            "_MD_WDGT": r"!\[[^]]*]\([^)]+\)",
+            "_L1NK": r"\[([^]]+)]\(([^)]+)\)",
+            "_HTML": r"<.*?>",
+            "_NON_TRANSLATE": r"\[\[.*?\]\]"
         }
-        for key, pat in patterns.items():
-            for m in re.finditer(pat, text):
-                ph = self._generate_placeholder(key)
-                placeholder_map[key].append((ph, m.group(0)))
-                text = text.replace(m.group(0), ph, 1)
-                log_dbg(f"Placeholder {ph} for {key}")
+
+        lines = text.splitlines()
+        processed_lines = []
+        for line in lines:
+            if line.strip().startswith("> [!"):
+                unique_placeholder = self._generate_placeholder("_MD_BLOCK_NOTE")
+                placeholder_map.setdefault("_MD_BLOCK_NOTE", []).append((unique_placeholder, line))
+                log_dbg(f"Created block-note placeholder: {unique_placeholder} for line: {line}")
+                processed_lines.append(unique_placeholder)
+            else:
+                processed_lines.append(line)
+
+        text = "\n".join(processed_lines)
+
+        for key, pattern in patterns.items():
+            matches = re.findall(pattern, text)
+            for match in matches:
+                unique_placeholder = self._generate_placeholder(key)
+                placeholder_map[key].append((unique_placeholder, match))
+                log_dbg(f"Created placeholder: {unique_placeholder} for tag: {key}")
+                match_str = "".join(match) if isinstance(match, tuple) else match
+                text = text.replace(match_str, unique_placeholder, 1)
+
         return text
 
-    def _restore_placeholders(self, text, placeholder_map):
+    @staticmethod
+    def _restore_placeholders(text, placeholder_map):
         for key, mappings in placeholder_map.items():
             for ph, original in mappings:
                 text = text.replace(ph, original)
