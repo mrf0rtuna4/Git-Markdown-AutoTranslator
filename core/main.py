@@ -25,11 +25,7 @@ SOFTWARE.
 import asyncio
 import sys
 
-from dotenv import load_dotenv
-
 from app import LocalizationManager, log_info, log_error
-
-load_dotenv()
 
 
 async def main():
