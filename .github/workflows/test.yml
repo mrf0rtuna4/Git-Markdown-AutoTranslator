@@ -1,0 +1,28 @@
+name: Test Latest Branch
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches: [ main, latest ]
+
+jobs:
+  translate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run translation
+        uses: mrf0rtuna4/Git-Markdown-AutoTranslator@latest
+        with:
+          LANGS: 'en, ar, uk, it, ja'
+          FILES: 'README.md'
+
+      - name: Push to GitHub
+        uses: crazy-max/ghaction-github-pages@v3.1.0
+        with:
+          target_branch: translations_latest
+          build_dir: 'dist'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GTK }}
