@@ -1,8 +1,10 @@
-FROM python:3.9.16-slim AS builder
-
+FROM python:3.8
 COPY requirements.txt /requirements.txt
-RUN pip install -r /requirements.txt
+
+RUN pip install -r requirements.txt
 
 COPY core ./core
 
-ENTRYPOINT ["python", "core/main.py"]
+COPY ./core/app/*.py ./core/app/
+
+ENTRYPOINT ["python", "/core/main.py"]
