@@ -50,12 +50,20 @@ class LocalizationManager:
         self.semaphore = asyncio.Semaphore(max_threads)
         self.processor = Processor()
         self.dist_dir = dist_dir
+        self._translation_cache = {}
 
     async def translate_text(self, text, lang):
+        cache_key = (lang, text)
+        cached = self._translation_cache.get(cache_key)
+        if cached is not None:
+            return cached
+
         async with self.semaphore:
             translator = GoogleTranslator(source="auto", target=lang)
             try:
-                return translator.translate(text)
+                translated = translator.translate(text)
+                self._translation_cache[cache_key] = translated
+                return translated
             except Exception as e:
                 log_error(f"Translation failed for {lang}: {str(e)}")
                 raise TranslationFailedError(f"Translation failed for '{lang}'") from e
