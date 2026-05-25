@@ -24,9 +24,12 @@ SOFTWARE.
 
 import asyncio
 import sys
+from pathlib import Path
 
 from core.app import LocalizationManager, log_error, log_info
 from core.app.exceptions import InvalidArgumentsError, InvalidMarkdownFileError
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 
 def _parse_arguments(argv):
