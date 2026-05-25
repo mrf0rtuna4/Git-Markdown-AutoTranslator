@@ -25,8 +25,8 @@ SOFTWARE.
 import asyncio
 import sys
 
-from app import LocalizationManager, log_info, log_error
-from app.exceptions import InvalidArgumentsError, InvalidMarkdownFileError
+from core.app import LocalizationManager, log_error, log_info
+from core.app.exceptions import InvalidArgumentsError, InvalidMarkdownFileError
 
 
 def _parse_arguments(argv):
@@ -38,6 +38,7 @@ def _parse_arguments(argv):
         ) from exc
     return files, langs, debug, max_threads, max_line_length
 
+
 async def main():
     log_info("💚 AutoLocalizator | by mrf0rtuna4")
     try:
@@ -46,13 +47,14 @@ async def main():
         log_error(f"❌ {exc}")
         sys.exit(1)
 
-    if debug.lower() == 'true':
+    if debug.lower() == "true":
         import logging
+
         logging.getLogger().setLevel(logging.DEBUG)
 
     try:
-        for fn in [f.strip() for f in files.split(',')]:
-            if not fn.endswith('.md'):
+        for fn in [f.strip() for f in files.split(",")]:
+            if not fn.endswith(".md"):
                 raise InvalidMarkdownFileError(f"File {fn} is not a markdown file")
     except InvalidMarkdownFileError as exc:
         log_error(f"❌ {exc}")
@@ -62,10 +64,10 @@ async def main():
         langs=langs,
         files=files,
         max_line_length=int(max_line_length),
-        max_threads=int(max_threads)
+        max_threads=int(max_threads),
     )
     await manager.update_localizations()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     asyncio.run(main())

@@ -25,14 +25,17 @@ SOFTWARE.
 import re
 import uuid
 
-from .logger import log_info, log_error, log_dbg
+from .logger import log_dbg, log_error, log_info
 
 EXCLUDED_ADMONITIONS = ("IMPORTANT", "CAUTION", "TIP")
 
+
 class Processor:
     def __init__(self):
-        self.placeholder_map = {key: [] for key in (
-            '_BL0CK', '_L1NK', '_HTML', '_MD_WDGT', '_NON_TRANSLATE')}
+        self.placeholder_map = {
+            key: []
+            for key in ("_BL0CK", "_L1NK", "_HTML", "_MD_WDGT", "_NON_TRANSLATE")
+        }
 
     @staticmethod
     def _generate_placeholder(prefix):
@@ -47,7 +50,7 @@ class Processor:
             "_MD_WDGT": r"!\[[^]]*]\([^)]+\)",
             "_L1NK": r"\[([^]]+)]\(([^)]+)\)",
             "_HTML": r"<.*?>",
-            "_NON_TRANSLATE": r"\[\[.*?\]\]"
+            "_NON_TRANSLATE": r"\[\[.*?\]\]",
         }
 
         lines = text.splitlines()
@@ -70,7 +73,9 @@ class Processor:
 
                 original_block = "\n".join(block)
                 unique_placeholder = self._generate_placeholder("_MD_BLOCK_NOTE")
-                placeholder_map.setdefault("_MD_BLOCK_NOTE", []).append((unique_placeholder, original_block))
+                placeholder_map.setdefault("_MD_BLOCK_NOTE", []).append(
+                    (unique_placeholder, original_block)
+                )
                 log_dbg(f"Created block-note placeholder: {unique_placeholder}")
                 processed_lines.append(unique_placeholder)
                 continue
@@ -103,11 +108,11 @@ class Processor:
         lines = []
         for raw in text.splitlines():
             if not raw.strip():
-                lines.append('')
+                lines.append("")
                 continue
             line = raw
             while len(line) > max_line_length:
-                idx = line[:max_line_length].rfind(' ') or max_line_length
+                idx = line[:max_line_length].rfind(" ") or max_line_length
                 lines.append(line[:idx])
                 line = line[idx:].lstrip()
             lines.append(line)
@@ -115,15 +120,21 @@ class Processor:
         return lines, self.placeholder_map
 
     def build_file(self, translated_lines, placeholder_map, lang, *, file=None):
-        content = '\n'.join(line if line is not None else '' for line in translated_lines)
+        content = "\n".join(
+            line if line is not None else "" for line in translated_lines
+        )
         log_info(f"📦 Rebuilding {lang}_{file}")
         text = self._restore_placeholders(content, placeholder_map)
         text = re.sub(r"(\*\*|__)[ \t]*(.*?)[ \t]*(\1)", r"\1\2\1", text)
         return text
 
     def post_check_placeholders(self, translated_content):
-        rem = [ph for maps in self.placeholder_map.values()
-               for ph, _ in maps if ph in translated_content]
+        rem = [
+            ph
+            for maps in self.placeholder_map.values()
+            for ph, _ in maps
+            if ph in translated_content
+        ]
         if rem:
             log_error(f"❌ Placeholders left: {rem}")
             raise ValueError("Unreplaced placeholders")

@@ -23,15 +23,27 @@
 import asyncio
 import os
 
-from app.logger import log_info, log_error
-from app.processor import Processor
-from app.exceptions import TranslationFailedError, FileWriteError
 from deep_translator import GoogleTranslator
+
+from .exceptions import FileWriteError, TranslationFailedError
+from .logger import log_error, log_info
+from .processor import Processor
 
 
 class LocalizationManager:
-    def __init__(self, langs, files, max_line_length: int = 500, max_threads: int = 5, dist_dir="dist"):
-        self.files = [file.strip() for file in files.split(",")] if isinstance(files, str) else files
+    def __init__(
+        self,
+        langs,
+        files,
+        max_line_length: int = 500,
+        max_threads: int = 5,
+        dist_dir="dist",
+    ):
+        self.files = (
+            [file.strip() for file in files.split(",")]
+            if isinstance(files, str)
+            else files
+        )
         self.langs = [lang.strip() for lang in langs.split(",")]
         self.max_line_length = max_line_length
         self.max_threads = max_threads  # TODO:
@@ -41,7 +53,7 @@ class LocalizationManager:
 
     async def translate_text(self, text, lang):
         async with self.semaphore:
-            translator = GoogleTranslator(source='auto', target=lang)
+            translator = GoogleTranslator(source="auto", target=lang)
             try:
                 return translator.translate(text)
             except Exception as e:
@@ -52,8 +64,9 @@ class LocalizationManager:
         with open(file_path, "r", encoding="utf-8") as file:
             content = file.read()
 
-        lines, placeholder_map = self.processor.decompile_file(content, file=file_path,
-                                                               max_line_length=self.max_line_length)
+        lines, placeholder_map = self.processor.decompile_file(
+            content, file=file_path, max_line_length=self.max_line_length
+        )
         translations = {lang: [] for lang in self.langs}
 
         for line in lines:
@@ -63,8 +76,11 @@ class LocalizationManager:
                 continue
 
             is_placeholder_only = all(
-                any(placeholder in line for placeholders in self.processor.placeholder_map.values() for placeholder, _
-                    in placeholders)
+                any(
+                    placeholder in line
+                    for placeholders in self.processor.placeholder_map.values()
+                    for placeholder, _ in placeholders
+                )
                 for _ in line.split()
             )
 
@@ -96,7 +112,9 @@ class LocalizationManager:
             log_info(f"⌛ File saved: {file_path}")
         except Exception as e:
             log_error(f"💥 Failed to write file for {lang} ({file_path}): {str(e)}")
-            raise FileWriteError(f"Failed to write translation file: {file_path}") from e
+            raise FileWriteError(
+                f"Failed to write translation file: {file_path}"
+            ) from e
 
     async def update_localizations(self):
         tasks = [self.process_file(file_path) for file_path in self.files]
