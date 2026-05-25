@@ -26,24 +26,37 @@ import asyncio
 import sys
 
 from app import LocalizationManager, log_info, log_error
+from app.exceptions import InvalidArgumentsError, InvalidMarkdownFileError
 
+
+def _parse_arguments(argv):
+    try:
+        files, langs, debug, max_threads, max_line_length = argv[1:6]
+    except ValueError as exc:
+        raise InvalidArgumentsError(
+            "Invalid arguments. Usage: <files> <langs> <debug> <max_threads> <max_line_length>"
+        ) from exc
+    return files, langs, debug, max_threads, max_line_length
 
 async def main():
     log_info("💚 AutoLocalizator | by mrf0rtuna4")
     try:
-        files, langs, debug, max_threads, max_line_length = sys.argv[1:6]
-    except ValueError:
-        log_error("❌ Invalid arguments. Usage: <files> <langs> <debug> <max_threads> <max_line_length>")
+        files, langs, debug, max_threads, max_line_length = _parse_arguments(sys.argv)
+    except InvalidArgumentsError as exc:
+        log_error(f"❌ {exc}")
         sys.exit(1)
 
     if debug.lower() == 'true':
         import logging
         logging.getLogger().setLevel(logging.DEBUG)
 
-    for fn in [f.strip() for f in files.split(',')]:
-        if not fn.endswith('.md'):
-            log_error(f"❌ File {fn} is not a markdown file")
-            sys.exit(1)
+    try:
+        for fn in [f.strip() for f in files.split(',')]:
+            if not fn.endswith('.md'):
+                raise InvalidMarkdownFileError(f"File {fn} is not a markdown file")
+    except InvalidMarkdownFileError as exc:
+        log_error(f"❌ {exc}")
+        sys.exit(1)
 
     manager = LocalizationManager(
         langs=langs,

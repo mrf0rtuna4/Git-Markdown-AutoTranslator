@@ -25,6 +25,7 @@ import os
 
 from app.logger import log_info, log_error
 from app.processor import Processor
+from app.exceptions import TranslationFailedError, FileWriteError
 from deep_translator import GoogleTranslator
 
 
@@ -45,7 +46,7 @@ class LocalizationManager:
                 return translator.translate(text)
             except Exception as e:
                 log_error(f"Translation failed for {lang}: {str(e)}")
-                raise
+                raise TranslationFailedError(f"Translation failed for '{lang}'") from e
 
     async def process_file(self, file_path):
         with open(file_path, "r", encoding="utf-8") as file:
@@ -95,7 +96,7 @@ class LocalizationManager:
             log_info(f"⌛ File saved: {file_path}")
         except Exception as e:
             log_error(f"💥 Failed to write file for {lang} ({file_path}): {str(e)}")
-            raise
+            raise FileWriteError(f"Failed to write translation file: {file_path}") from e
 
     async def update_localizations(self):
         tasks = [self.process_file(file_path) for file_path in self.files]

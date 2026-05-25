@@ -27,6 +27,7 @@ import uuid
 
 from .logger import log_info, log_error, log_dbg
 
+EXCLUDED_ADMONITIONS = ("IMPORTANT", "CAUTION", "TIP")
 
 class Processor:
     def __init__(self):
@@ -51,14 +52,31 @@ class Processor:
 
         lines = text.splitlines()
         processed_lines = []
-        for line in lines:
-            if line.strip().startswith("> [!"):
+        i = 0
+        while i < len(lines):
+            line = lines[i]
+            stripped = line.strip()
+            admonition_match = re.match(r"^>\s*\[!([A-Z]+)]", stripped)
+            if admonition_match and admonition_match.group(1) in EXCLUDED_ADMONITIONS:
+                block = [line]
+                i += 1
+                while i < len(lines):
+                    next_line = lines[i]
+                    if next_line.strip().startswith(">"):
+                        block.append(next_line)
+                        i += 1
+                        continue
+                    break
+
+                original_block = "\n".join(block)
                 unique_placeholder = self._generate_placeholder("_MD_BLOCK_NOTE")
-                placeholder_map.setdefault("_MD_BLOCK_NOTE", []).append((unique_placeholder, line))
-                log_dbg(f"Created block-note placeholder: {unique_placeholder} for line: {line}")
+                placeholder_map.setdefault("_MD_BLOCK_NOTE", []).append((unique_placeholder, original_block))
+                log_dbg(f"Created block-note placeholder: {unique_placeholder}")
                 processed_lines.append(unique_placeholder)
-            else:
-                processed_lines.append(line)
+                continue
+
+            processed_lines.append(line)
+            i += 1
 
         text = "\n".join(processed_lines)
 
