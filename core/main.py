@@ -22,14 +22,13 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
+from core.app.exceptions import InvalidArgumentsError, InvalidMarkdownFileError
+from core.app import LocalizationManager, log_error, log_info
 import asyncio
 import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
-from core.app import LocalizationManager, log_error, log_info
-from core.app.exceptions import InvalidArgumentsError, InvalidMarkdownFileError
 
 
 def _parse_arguments(argv):
@@ -45,7 +44,8 @@ def _parse_arguments(argv):
 async def main():
     log_info("💚 AutoLocalizator | by mrf0rtuna4")
     try:
-        files, langs, debug, max_threads, max_line_length = _parse_arguments(sys.argv)
+        files, langs, debug, max_threads, max_line_length = _parse_arguments(
+            sys.argv)
     except InvalidArgumentsError as exc:
         log_error(f"❌ {exc}")
         sys.exit(1)
@@ -58,7 +58,8 @@ async def main():
     try:
         for fn in [f.strip() for f in files.split(",")]:
             if not fn.endswith(".md"):
-                raise InvalidMarkdownFileError(f"File {fn} is not a markdown file")
+                raise InvalidMarkdownFileError(
+                    f"File {fn} is not a markdown file")
     except InvalidMarkdownFileError as exc:
         log_error(f"❌ {exc}")
         sys.exit(1)

@@ -72,11 +72,13 @@ class Processor:
                     break
 
                 original_block = "\n".join(block)
-                unique_placeholder = self._generate_placeholder("_MD_BLOCK_NOTE")
+                unique_placeholder = self._generate_placeholder(
+                    "_MD_BLOCK_NOTE")
                 placeholder_map.setdefault("_MD_BLOCK_NOTE", []).append(
                     (unique_placeholder, original_block)
                 )
-                log_dbg(f"Created block-note placeholder: {unique_placeholder}")
+                log_dbg(
+                    f"Created block-note placeholder: {unique_placeholder}")
                 processed_lines.append(unique_placeholder)
                 continue
 
@@ -89,9 +91,11 @@ class Processor:
             matches = re.findall(pattern, text)
             for match in matches:
                 unique_placeholder = self._generate_placeholder(key)
-                match_str = "".join(match) if isinstance(match, tuple) else match
+                match_str = "".join(match) if isinstance(
+                    match, tuple) else match
                 placeholder_map[key].append((unique_placeholder, match_str))
-                log_dbg(f"Created placeholder: {unique_placeholder} for tag: {key}")
+                log_dbg(
+                    f"Created placeholder: {unique_placeholder} for tag: {key}")
                 text = text.replace(match_str, unique_placeholder, 1)
         return text
 

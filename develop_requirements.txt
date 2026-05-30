@@ -1,0 +1,6 @@
+PyGithub
+deep_translator
+ruff
+black
+autopep8
+ipykernel

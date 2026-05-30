@@ -22,6 +22,7 @@
 
 import asyncio
 import os
+from concurrent.futures import ThreadPoolExecutor
 
 from deep_translator import GoogleTranslator
 
@@ -46,11 +47,23 @@ class LocalizationManager:
         )
         self.langs = [lang.strip() for lang in langs.split(",")]
         self.max_line_length = max_line_length
-        self.max_threads = max_threads  # TODO:
+        self.max_threads = max_threads
         self.semaphore = asyncio.Semaphore(max_threads)
+        self.translation_executor = ThreadPoolExecutor(max_workers=max_threads)
         self.processor = Processor()
         self.dist_dir = dist_dir
         self._translation_cache = {}
+
+    @staticmethod
+    def _translate_sync(text, lang):
+        translator = GoogleTranslator(source="auto", target=lang)
+        return translator.translate(text)
+
+    async def _run_blocking_translation(self, text, lang):
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(
+            self.translation_executor, self._translate_sync, text, lang
+        )
 
     async def translate_text(self, text, lang):
         cache_key = (lang, text)
@@ -59,14 +72,14 @@ class LocalizationManager:
             return cached
 
         async with self.semaphore:
-            translator = GoogleTranslator(source="auto", target=lang)
             try:
-                translated = translator.translate(text)
+                translated = await self._run_blocking_translation(text, lang)
                 self._translation_cache[cache_key] = translated
                 return translated
             except Exception as e:
                 log_error(f"Translation failed for {lang}: {str(e)}")
-                raise TranslationFailedError(f"Translation failed for '{lang}'") from e
+                raise TranslationFailedError(
+                    f"Translation failed for '{lang}'") from e
 
     async def process_file(self, file_path):
         with open(file_path, "r", encoding="utf-8") as file:
@@ -97,7 +110,8 @@ class LocalizationManager:
                     translations[lang].append(line)
                 continue
 
-            translation_tasks = [self.translate_text(line, lang) for lang in self.langs]
+            translation_tasks = [self.translate_text(
+                line, lang) for lang in self.langs]
             translated_lines = await asyncio.gather(*translation_tasks)
             for lang, translated_line in zip(self.langs, translated_lines):
                 translations[lang].append(translated_line)
@@ -119,12 +133,19 @@ class LocalizationManager:
                 file.write(content)
             log_info(f"⌛ File saved: {file_path}")
         except Exception as e:
-            log_error(f"💥 Failed to write file for {lang} ({file_path}): {str(e)}")
+            log_error(
+                f"💥 Failed to write file for {lang} ({file_path}): {str(e)}")
             raise FileWriteError(
                 f"Failed to write translation file: {file_path}"
             ) from e
 
+    def shutdown(self):
+        self.translation_executor.shutdown(wait=True)
+
     async def update_localizations(self):
-        tasks = [self.process_file(file_path) for file_path in self.files]
-        await asyncio.gather(*tasks)
-        log_info("🎈 All files have been processed.")
+        try:
+            tasks = [self.process_file(file_path) for file_path in self.files]
+            await asyncio.gather(*tasks)
+            log_info("🎈 All files have been processed.")
+        finally:
+            self.shutdown()
