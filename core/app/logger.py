@@ -29,17 +29,17 @@ level = logging.INFO
 logging.basicConfig(level=level, format="[%(levelname)s]: %(message)s")
 
 
-def log_error(message):
+def log_error(message: str):
     logging.error(message)
 
 
-def log_info(message):
+def log_info(message: str):
     logging.info(message)
 
 
-def log_warn(message):
+def log_warn(message: str):
     logging.warning(message)
 
 
-def log_dbg(message):
+def log_dbg(message: str):
     logging.debug(message)

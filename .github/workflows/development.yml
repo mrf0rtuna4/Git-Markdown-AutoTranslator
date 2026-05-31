@@ -5,7 +5,7 @@ on:
 
   push:
     branches:
-      - master
+      - md_ast
 
 permissions:
   contents: write
@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run translation
-        uses: mrf0rtuna4/Git-Markdown-AutoTranslator@master
+        uses: mrf0rtuna4/Git-Markdown-AutoTranslator@md_ast
         with:
           LANGS: 'ru, ar, uk, it, ja'
           FILES: 'README.md'

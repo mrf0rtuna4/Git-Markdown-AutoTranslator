@@ -4,3 +4,4 @@ ruff
 black
 autopep8
 ipykernel
+markdown-it-py
