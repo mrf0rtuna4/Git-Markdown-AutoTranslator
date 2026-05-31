@@ -22,6 +22,7 @@
 
 import asyncio
 import os
+import re
 from concurrent.futures import ThreadPoolExecutor
 
 from deep_translator import GoogleTranslator
@@ -65,6 +66,33 @@ class LocalizationManager:
             self.translation_executor, self._translate_sync, text, lang
         )
 
+    def _placeholder_pattern(self):
+        placeholders = [
+            re.escape(placeholder)
+            for placeholders in self.processor.placeholder_map.values()
+            for placeholder, _ in placeholders
+        ]
+        if not placeholders:
+            return None
+        return re.compile(f"({'|'.join(placeholders)})")
+
+    async def translate_markdown_unit(self, text, lang):
+        pattern = self._placeholder_pattern()
+        if pattern is None or not pattern.search(text):
+            return await self.translate_text(text, lang)
+
+        translated_parts = []
+        for part in pattern.split(text):
+            if not part:
+                continue
+            if pattern.fullmatch(part):
+                translated_parts.append(part)
+            elif re.search(r"\w", part):
+                translated_parts.append(await self.translate_text(part, lang))
+            else:
+                translated_parts.append(part)
+        return "".join(translated_parts)
+
     async def translate_text(self, text, lang):
         cache_key = (lang, text)
         cached = self._translation_cache.get(cache_key)
@@ -96,13 +124,9 @@ class LocalizationManager:
                     translations[lang].append("")
                 continue
 
-            is_placeholder_only = all(
-                any(
-                    placeholder in line
-                    for placeholders in self.processor.placeholder_map.values()
-                    for placeholder, _ in placeholders
-                )
-                for _ in line.split()
+            placeholder_pattern = self._placeholder_pattern()
+            is_placeholder_only = bool(
+                placeholder_pattern and placeholder_pattern.fullmatch(line.strip())
             )
 
             if is_placeholder_only:
@@ -110,8 +134,9 @@ class LocalizationManager:
                     translations[lang].append(line)
                 continue
 
-            translation_tasks = [self.translate_text(
-                line, lang) for lang in self.langs]
+            translation_tasks = [
+                self.translate_markdown_unit(line, lang) for lang in self.langs
+            ]
             translated_lines = await asyncio.gather(*translation_tasks)
             for lang, translated_line in zip(self.langs, translated_lines):
                 translations[lang].append(translated_line)

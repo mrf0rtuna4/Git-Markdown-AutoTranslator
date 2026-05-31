@@ -124,11 +124,6 @@ class Processor:
         )
     
     @staticmethod
-    def asd():
-        a = 1
-        return bool(a)
-
-    @staticmethod
     def _admonition_type(line):
         match = re.match(r"^\s*>\s*\[!([A-Z]+)]", line)
         return match.group(1) if match else None
@@ -165,11 +160,8 @@ class Processor:
 
             admonition = self._admonition_type(line)
             if admonition in EXCLUDED_ADMONITIONS:
-                start = index
+                protected.append(MarkdownRange(index, index + 1, "admonition"))
                 index += 1
-                while index < len(lines) and lines[index].strip().startswith(">"):
-                    index += 1
-                protected.append(MarkdownRange(start, index, "admonition"))
                 continue
 
             if stripped.startswith("|") and "|" in stripped[1:]:
@@ -247,7 +239,7 @@ class Processor:
                 if self._admonition_type(first_line) in EXCLUDED_ADMONITIONS:
                     protected.append(
                         MarkdownRange(
-                            blockquote_map[0], blockquote_map[1], "admonition"
+                            blockquote_map[0], blockquote_map[0] + 1, "admonition"
                         )
                     )
 
@@ -277,6 +269,47 @@ class Processor:
     def _is_within_ranges(ranges, index):
         return any(current.start <= index < current.end for current in ranges)
 
+    @staticmethod
+    def _subtract_protected_ranges(translatable_ranges, protected_ranges):
+        safe_ranges = []
+        for translatable in translatable_ranges:
+            segments = [(translatable.start, translatable.end)]
+            for protected in protected_ranges:
+                next_segments = []
+                for start, end in segments:
+                    if protected.end <= start or end <= protected.start:
+                        next_segments.append((start, end))
+                        continue
+                    if start < protected.start:
+                        next_segments.append((start, protected.start))
+                    if protected.end < end:
+                        next_segments.append((protected.end, end))
+                segments = next_segments
+
+            safe_ranges.extend(
+                MarkdownRange(start, end, translatable.kind)
+                for start, end in segments
+                if start < end
+            )
+
+        return safe_ranges
+
+    def _protect_inline_markdown(self, unit, placeholder_map):
+        protected = re.sub(
+            r"`[^`\n]+`",
+            lambda match: self._store_placeholder(
+                "_NON_TRANSLATE", match.group(0), placeholder_map
+            ),
+            unit,
+        )
+        return re.sub(
+            r"(?<=\]\()([^\s)]+)",
+            lambda match: self._store_placeholder(
+                "_L1NK", match.group(0), placeholder_map
+            ),
+            protected,
+        )
+
     def _split_translation_unit(self, unit, max_line_length):
         if len(unit) <= max_line_length:
             return [unit]
@@ -304,12 +337,7 @@ class Processor:
             content, lines)
         protected_ranges = self._merge_ranges(protected_ranges)
         translatable_ranges = self._merge_ranges(
-            range_item
-            for range_item in translatable_ranges
-            if not any(
-                protected.start < range_item.end and range_item.start < protected.end
-                for protected in protected_ranges
-            )
+            self._subtract_protected_ranges(translatable_ranges, protected_ranges)
         )
 
         output = []
@@ -317,7 +345,7 @@ class Processor:
         while index < len(lines):
             protected = self._range_starts(protected_ranges, index)
             if protected:
-                original = "\n".join(lines[protected.start: protected.end])
+                original = "\n".join(lines[protected.start : protected.end])
                 key = (
                     "_MD_BLOCK_NOTE"
                     if "admonition" in protected.kind
@@ -329,10 +357,13 @@ class Processor:
                 continue
             translatable = self._range_starts(translatable_ranges, index)
             if translatable:
-                original = "\n".join(
-                    lines[translatable.start: translatable.end])
-                output.extend(self._split_translation_unit(
-                    original, max_line_length))
+                original = "\n".join(lines[translatable.start : translatable.end])
+                protected_original = self._protect_inline_markdown(
+                    original, placeholder_map
+                )
+                output.extend(
+                    self._split_translation_unit(protected_original, max_line_length)
+                )
                 index = translatable.end
                 continue
 
