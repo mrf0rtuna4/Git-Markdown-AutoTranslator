@@ -19,54 +19,55 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
+from __future__ import annotations
 
 import asyncio
 import os
 import re
+from re import Pattern
 from concurrent.futures import ThreadPoolExecutor
 
-from deep_translator import GoogleTranslator
+from deep_translator import GoogleTranslator # pyright: ignore[reportMissingTypeStubs]
 
 from .exceptions import FileWriteError, TranslationFailedError
-from .logger import log_error, log_info
+from .logger import Logger
 from .processor import Processor
 
 
 class LocalizationManager:
     def __init__(
         self,
-        langs,
-        files,
-        max_line_length: int = 500,
+        files: str,
+        langs: str,
         max_threads: int = 5,
-        dist_dir="dist",
+        max_line_length: int = 500,
+        dist_dir: str = "dist",
     ):
-        self.files = (
-            [file.strip() for file in files.split(",")]
-            if isinstance(files, str)
-            else files
-        )
-        self.langs = [lang.strip() for lang in langs.split(",")]
+        self.files: list[str] = ([file.strip() for file in files.split(",")])
+        self.langs: list[str] = [lang.strip() for lang in langs.split(",")]
         self.max_line_length = max_line_length
         self.max_threads = max_threads
-        self.semaphore = asyncio.Semaphore(max_threads)
-        self.translation_executor = ThreadPoolExecutor(max_workers=max_threads)
-        self.processor = Processor()
+        self.semaphore: asyncio.Semaphore = asyncio.Semaphore(max_threads)
+        self.translation_executor: ThreadPoolExecutor = ThreadPoolExecutor(
+            max_workers=max_threads)
+        self.processor: Processor = Processor()
         self.dist_dir = dist_dir
-        self._translation_cache = {}
+        self._translation_cache: dict[tuple[str, str], str] = {}
+        self.logger: Logger = Logger()
 
     @staticmethod
-    def _translate_sync(text, lang):
+    def _translate_sync(text: str, lang: str) -> str:
         translator = GoogleTranslator(source="auto", target=lang)
-        return translator.translate(text)
 
-    async def _run_blocking_translation(self, text, lang):
+        return translator.translate(text) # pyright: ignore[reportUnknownMemberType]
+
+    async def _run_blocking_translation(self, text: str, lang: str) -> str:
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(
             self.translation_executor, self._translate_sync, text, lang
         )
 
-    def _placeholder_pattern(self):
+    def _placeholder_pattern(self) -> Pattern[str] | None:
         placeholders = [
             re.escape(placeholder)
             for placeholders in self.processor.placeholder_map.values()
@@ -76,12 +77,12 @@ class LocalizationManager:
             return None
         return re.compile(f"({'|'.join(placeholders)})")
 
-    async def translate_markdown_unit(self, text, lang):
+    async def translate_markdown_unit(self, text: str, lang: str) -> str:
         pattern = self._placeholder_pattern()
         if pattern is None or not pattern.search(text):
             return await self.translate_text(text, lang)
 
-        translated_parts = []
+        translated_parts: list[str] = []
         for part in pattern.split(text):
             if not part:
                 continue
@@ -93,7 +94,7 @@ class LocalizationManager:
                 translated_parts.append(part)
         return "".join(translated_parts)
 
-    async def translate_text(self, text, lang):
+    async def translate_text(self, text: str, lang: str) -> str:
         cache_key = (lang, text)
         cached = self._translation_cache.get(cache_key)
         if cached is not None:
@@ -105,18 +106,19 @@ class LocalizationManager:
                 self._translation_cache[cache_key] = translated
                 return translated
             except Exception as e:
-                log_error(f"Translation failed for {lang}: {str(e)}")
+                self.logger.log_error(
+                    f"Translation failed for {lang}: {str(e)}")
                 raise TranslationFailedError(
                     f"Translation failed for '{lang}'") from e
 
-    async def process_file(self, file_path):
+    async def process_file(self, file_path: str) -> None:
         with open(file_path, "r", encoding="utf-8") as file:
             content = file.read()
 
         lines, placeholder_map = self.processor.decompile_file(
             content, file=file_path, max_line_length=self.max_line_length
         )
-        translations = {lang: [] for lang in self.langs}
+        translations: dict[str, list[str]] = {lang: [] for lang in self.langs}
 
         for line in lines:
             if not line.strip():
@@ -126,7 +128,8 @@ class LocalizationManager:
 
             placeholder_pattern = self._placeholder_pattern()
             is_placeholder_only = bool(
-                placeholder_pattern and placeholder_pattern.fullmatch(line.strip())
+                placeholder_pattern and placeholder_pattern.fullmatch(
+                    line.strip())
             )
 
             if is_placeholder_only:
@@ -148,7 +151,12 @@ class LocalizationManager:
             self.processor.post_check_placeholders(translated_content)
             await self.write_to_file(file_path, lang, translated_content)
 
-    async def write_to_file(self, original_file, lang, content):
+    async def write_to_file(
+        self,
+        original_file: str,
+        lang: str,
+        content: str,
+    ) -> None:
         base_name = os.path.basename(original_file)
         file_path = os.path.join(self.dist_dir, f"{lang}_{base_name}")
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
@@ -156,21 +164,21 @@ class LocalizationManager:
         try:
             with open(file_path, "w", encoding="utf-8") as file:
                 file.write(content)
-            log_info(f"⌛ File saved: {file_path}")
+            self.logger.log_info(f"⌛ File saved: {file_path}")
         except Exception as e:
-            log_error(
+            self.logger.log_error(
                 f"💥 Failed to write file for {lang} ({file_path}): {str(e)}")
             raise FileWriteError(
                 f"Failed to write translation file: {file_path}"
             ) from e
 
-    def shutdown(self):
+    def shutdown(self) -> None:
         self.translation_executor.shutdown(wait=True)
 
-    async def update_localizations(self):
+    async def update_localizations(self) -> None:
         try:
             tasks = [self.process_file(file_path) for file_path in self.files]
             await asyncio.gather(*tasks)
-            log_info("🎈 All files have been processed.")
+            self.logger.log_info("🎈 All files have been processed.")
         finally:
             self.shutdown()

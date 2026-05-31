@@ -21,56 +21,64 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
-
 import asyncio
 import sys
 from pathlib import Path
+from typing import Sequence
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent)) # DO NOT MOVE, THIS MAY STAY BEFORE core.* IMPORTS
+# DO NOT MOVE, THIS MAY STAY BEFORE core.* IMPORTS
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from core.app import LocalizationManager, LocalizationConfig, Logger
 from core.app.exceptions import InvalidArgumentsError, InvalidMarkdownFileError
-from core.app import LocalizationManager, log_error, log_info
 
 
-
-def _parse_arguments(argv):
+def _parse_arguments(argv: Sequence[str]) -> LocalizationConfig:
     try:
         files, langs, debug, max_threads, max_line_length = argv[1:6]
     except ValueError as exc:
         raise InvalidArgumentsError(
             "Invalid arguments. Usage: <files> <langs> <debug> <max_threads> <max_line_length>"
         ) from exc
-    return files, langs, debug, max_threads, max_line_length
+
+    return LocalizationConfig(
+        files=files,
+        langs=langs,
+        debug=debug,
+        max_threads=max_threads,
+        max_line_length=max_line_length,
+    )
 
 
 async def main():
-    log_info("💚 AutoLocalizator | by mrf0rtuna4")
+    logger = Logger()
+    logger.log_info("💚 AutoLocalizator | by mrf0rtuna4")
+
     try:
-        files, langs, debug, max_threads, max_line_length = _parse_arguments(
-            sys.argv)
+        args = _parse_arguments(sys.argv)
     except InvalidArgumentsError as exc:
-        log_error(f"❌ {exc}")
+        logger.log_error(f"❌ {exc}")
         sys.exit(1)
 
-    if debug.lower() == "true":
+    if args.debug.lower() == "true":
         import logging
 
         logging.getLogger().setLevel(logging.DEBUG)
 
     try:
-        for fn in [f.strip() for f in files.split(",")]:
+        for fn in [f.strip() for f in args.files.split(",")]:
             if not fn.endswith(".md"):
                 raise InvalidMarkdownFileError(
                     f"File {fn} is not a markdown file")
     except InvalidMarkdownFileError as exc:
-        log_error(f"❌ {exc}")
+        logger.log_error(f"❌ {exc}")
         sys.exit(1)
 
     manager = LocalizationManager(
-        langs=langs,
-        files=files,
-        max_line_length=int(max_line_length),
-        max_threads=int(max_threads),
+        files=args.files,
+        langs=args.langs,
+        max_threads=int(args.max_threads),
+        max_line_length=int(args.max_line_length),
     )
     await manager.update_localizations()
 

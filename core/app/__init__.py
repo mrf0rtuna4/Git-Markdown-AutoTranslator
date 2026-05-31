@@ -1,13 +1,14 @@
 """ App methods and classes """
 
-from .file_handler import FileHandler
 from .localizator import LocalizationManager
-from .logger import log_error, log_info
+from .logger import Logger
 from .processor import Processor
+from .config import LocalizationConfig, MarkdownRange
 
 __all__ = [
-    "FileHandler",
     "LocalizationManager",
-    "log_error", "log_info",
-    "Processor"
+    "Logger",
+    "Processor",
+    "LocalizationConfig",
+    "MarkdownRange"
 ]

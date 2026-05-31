@@ -1,7 +1,7 @@
 """
 MIT License
 
-Copyright (c) 2024-2026. Mr_Fortuna
+Copyright (c) 2024-2026 Mr_Fortuna
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -21,22 +21,25 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
+from pathlib import Path
 
 
-class FileHandler:
-    def __init__(self, file_path):
-        self.file_path = file_path
-
-    def load_file(self):
-        with open(self.file_path, "r", encoding="utf-8") as file:
-            return file.read()
-
-    async def decompile(self, processor):
-        content = self.load_file()
-        chunks, placeholder_map = processor.decompile_file(content)
-        return chunks, placeholder_map
+class FileSystem:
+    @staticmethod
+    def read_text(path: str) -> str:
+        return Path(path).read_text(encoding="utf-8")
 
     @staticmethod
-    async def build_file(translated_chunks, processor):
-        translated_content = processor.build_file(translated_chunks)
-        return translated_content
+    def write_text(path: str, content: str) -> None:
+        file_path = Path(path)
+
+        file_path.parent.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+        file_path.write_text(
+            content,
+            encoding="utf-8",
+        )
+        
