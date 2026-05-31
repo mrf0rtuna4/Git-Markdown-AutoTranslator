@@ -22,13 +22,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 
-from core.app.exceptions import InvalidArgumentsError, InvalidMarkdownFileError
-from core.app import LocalizationManager, log_error, log_info
 import asyncio
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent)) # DO NOT MOVE, THIS MAY STAY BEFORE core.* IMPORTS
+
+from core.app.exceptions import InvalidArgumentsError, InvalidMarkdownFileError
+from core.app import LocalizationManager, log_error, log_info
+
 
 
 def _parse_arguments(argv):
