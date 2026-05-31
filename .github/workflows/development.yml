@@ -5,7 +5,7 @@ on:
 
   push:
     branches:
-      - master
+      - md_ast
 
 permissions:
   contents: write
