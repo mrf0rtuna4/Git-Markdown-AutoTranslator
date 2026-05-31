@@ -22,6 +22,7 @@ jobs:
         with:
           LANGS: 'ru, ar, uk, it, ja'
           FILES: 'README.md'
+          DEBUG: 'True'
 
       - name: Push to GitHub
         uses: crazy-max/ghaction-github-pages@v3
