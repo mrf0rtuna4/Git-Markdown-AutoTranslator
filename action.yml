@@ -6,23 +6,23 @@ branding:
   color: 'green'
 inputs:
   files:
-    description: 'Шаблон файлов для перевода (glob)'
+    description: 'List of files to be translated, separated by commas'
     required: true
     default: 'README.md'
   langs:
-    description: 'Список языков через запятую'
+    description: 'List of languages, separated by commas'
     required: true
     default: 'en,ru'
   debug:
-    description: 'Включить подробный лог'
+    description: 'Toggling debug mode'
     required: false
     default: 'false'
   max_threads:
-    description: 'Максимальное число потоков для перевода'
+    description: 'Maximum number of threads for translation'
     required: false
     default: '5'
   max_line_length:
-    description: 'Максимальная длина строки'
+    description: 'Maximum line length'
     required: false
     default: '500'
 runs:
