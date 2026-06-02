@@ -27,7 +27,7 @@ import re
 from re import Pattern
 from concurrent.futures import ThreadPoolExecutor
 
-from deep_translator import GoogleTranslator # pyright: ignore[reportMissingTypeStubs]
+from deep_translator import GoogleTranslator
 
 from .exceptions import FileWriteError, TranslationFailedError
 from .logger import Logger
