@@ -6,7 +6,7 @@
 
 
 > [!WARNING]
-> We only use TRANSLATION DeepL
+> We use AUTOMATIC TRANSLATION
 > This may affect the quality of the translation. It may also cause the system to MIS-identify your file data.
 
 This GitHub Action automatically generates and pushes localized versions of your **markdown** files based on the supported languages.
@@ -96,6 +96,23 @@ You can configure this action using the following inputs:
 - `DEBUG`: Set to `True` to enable detailed logging of the translation process. This is useful for troubleshooting but may generate verbose output.
 - `MAX_LINELENGTH_`: Specifies the maximum allowed line length for translation. **Use with caution!** Setting this value too low can cause errors or incomplete translations. (Default: 500)
 - `MAX_THREADS`: Allows you to control the maximum number of threads of the translation process. (Default: 5)
+- `PROVIDER` / `provider`: Selects the `deep-translator` provider. The default is `GoogleTranslator`. Supported values are `GoogleTranslator`, `PonsTranslator`, `LingueeTranslator`, `MyMemoryTranslator`, `YandexTranslator`, `MicrosoftTranslator`, `QcriTranslator`, `DeeplTranslator`, `LibreTranslator`, `PapagoTranslator`, `ChatGptTranslator`, and `BaiduTranslator`. Short aliases such as `google`, `deepl`, `libre`, and `chatgpt` are also accepted.
+- `SOURCE_LANGUAGE` / `source_language`: Source language sent to the selected provider. The default is `auto`; providers that do not support automatic detection may require an explicit language code such as `en`.
+- `PROVIDER_OPTIONS` / `provider_options`: Optional JSON object with provider-specific constructor arguments. This is useful for local runs, but GitHub Actions should usually pass secrets through environment variables instead.
+- `VALIDATE_PROVIDER` / `validate_provider`: Set to `true` to translate a short probe before processing files. This verifies that provider credentials and connectivity work before the action starts translating markdown files.
+
+Provider credentials can be supplied with these environment variables when the selected provider requires them:
+
+| Provider | Environment variables |
+| --- | --- |
+| `YandexTranslator` | `YANDEX_API_KEY` |
+| `MicrosoftTranslator` | `MICROSOFT_API_KEY`, `MICROSOFT_REGION` |
+| `QcriTranslator` | `QCRI_API_KEY` |
+| `DeeplTranslator` | `DEEPL_API_KEY`, `DEEPL_USE_FREE_API` |
+| `LibreTranslator` | `LIBRE_API_KEY`, `LIBRE_USE_FREE_API`, `LIBRE_CUSTOM_URL` |
+| `PapagoTranslator` | `PAPAGO_CLIENT_ID`, `PAPAGO_SECRET_KEY` |
+| `ChatGptTranslator` | `OPENAI_API_KEY`, `OPENAI_MODEL` |
+| `BaiduTranslator` | `BAIDU_APP_ID`, `BAIDU_APP_KEY` |
 
 > [!WARNING] 
 > Avoid using `MAX_LINELENGTH_` without fully understanding its implications. 
@@ -111,6 +128,24 @@ For example, if you want to generate files for Serbian, Italian, and English lan
         with:
           FILES: 'README.md' 
           LANGS: 'italian,english'
+          provider: 'GoogleTranslator'
+          source_language: 'auto'
+```
+
+Example with DeepL provider validation:
+
+```yml
+      - name: Run translation with DeepL
+        uses: mrf0rtuna4/Git-Markdown-AutoTranslator@v2.2.0
+        with:
+          FILES: 'README.md'
+          LANGS: 'de,fr'
+          provider: 'DeeplTranslator'
+          source_language: 'en'
+          validate_provider: 'true'
+        env:
+          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
+          DEEPL_USE_FREE_API: 'true'
 ```
 
 And you can view, how to work action by clicking this widgets:

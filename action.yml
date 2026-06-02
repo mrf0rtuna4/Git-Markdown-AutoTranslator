@@ -25,6 +25,22 @@ inputs:
     description: 'Maximum line length'
     required: false
     default: '500'
+  provider:
+    description: 'deep-translator provider to use (for example GoogleTranslator, DeeplTranslator, LibreTranslator)'
+    required: false
+    default: 'GoogleTranslator'
+  source_language:
+    description: 'Source language passed to the translation provider'
+    required: false
+    default: 'auto'
+  provider_options:
+    description: 'JSON object with provider-specific options; secrets can also be passed through provider environment variables'
+    required: false
+    default: ''
+  validate_provider:
+    description: 'Translate a short probe before processing files to verify provider connectivity'
+    required: false
+    default: 'false'
 runs:
   using: 'docker'
   image: 'Dockerfile'
@@ -34,3 +50,8 @@ runs:
     - ${{ inputs.debug }}
     - ${{ inputs.max_threads }}
     - ${{ inputs.max_line_length }}
+    - ${{ inputs.provider }}
+    - ${{ inputs.source_language }}
+    - ${{ inputs.provider_options }}
+    - ${{ inputs.validate_provider }}
+    
