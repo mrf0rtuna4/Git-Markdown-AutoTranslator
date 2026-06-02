@@ -1,7 +1,8 @@
-PyGithub
 deep_translator
-ruff
-black
-autopep8
-ipykernel
 markdown-it-py
+ruff
+mypy
+pytest
+pytest-cov
+pre-commit
+ipykernel

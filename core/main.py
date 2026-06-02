@@ -29,17 +29,64 @@ from typing import Sequence
 # DO NOT MOVE, THIS MAY STAY BEFORE core.* IMPORTS
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from core.app import LocalizationManager, LocalizationConfig, Logger
 from core.app.exceptions import InvalidArgumentsError, InvalidMarkdownFileError
+from core.app import LocalizationManager, LocalizationConfig, Logger, TranslationProviderFactory
 
 
 def _parse_arguments(argv: Sequence[str]) -> LocalizationConfig:
     try:
-        files, langs, debug, max_threads, max_line_length = argv[1:6]
+        (
+            files,
+            langs,
+            debug,
+            max_threads,
+            max_line_length,
+            *optional_args,
+        ) = argv[1:]
     except ValueError as exc:
         raise InvalidArgumentsError(
-            "Invalid arguments. Usage: <files> <langs> <debug> <max_threads> <max_line_length>"
+            "Invalid arguments. Usage: <files> <langs> <debug> "
+            "<max_threads> <max_line_length> "
+            "[provider] [source_language] [provider_options] "
+            "[validate_provider]"
         ) from exc
+
+    if len(optional_args) > 4:
+        raise InvalidArgumentsError(
+            "Invalid arguments. Usage: <files> <langs> <debug> "
+            "<max_threads> <max_line_length> "
+            "[provider] [source_language] [provider_options] "
+            "[validate_provider]"
+        )
+
+    provider: str = (
+        optional_args[0]
+        if len(optional_args) >= 1
+        else "GoogleTranslator"
+    )
+
+    source_language: str = (
+        optional_args[1]
+        if len(optional_args) >= 2
+        else "auto"
+    )
+
+    provider_options: str = (
+        optional_args[2]
+        if len(optional_args) >= 3
+        else ""
+    )
+
+    validate_provider: str = (
+        optional_args[3]
+        if len(optional_args) >= 4
+        else "false"
+    )
+
+    try:
+        TranslationProviderFactory.canonical_name(provider)
+    except ValueError as exc:
+        raise InvalidArgumentsError(str(exc)) from exc
 
     return LocalizationConfig(
         files=files,
@@ -47,7 +94,15 @@ def _parse_arguments(argv: Sequence[str]) -> LocalizationConfig:
         debug=debug,
         max_threads=max_threads,
         max_line_length=max_line_length,
+        provider=provider,
+        source_language=source_language,
+        provider_options=provider_options,
+        validate_provider=validate_provider,
     )
+
+
+def str_to_bool(value: str) -> bool:
+    return value.strip().lower() in {"true", "1", "yes", "on"}
 
 
 async def main():
@@ -60,13 +115,13 @@ async def main():
         logger.log_error(f"❌ {exc}")
         sys.exit(1)
 
-    if args.debug.lower() == "true":
+    if str_to_bool(args.debug):
         import logging
 
         logging.getLogger().setLevel(logging.DEBUG)
 
     try:
-        for fn in [f.strip() for f in args.files.split(",")]:
+        for fn in (f.strip() for f in args.files.split(",")):
             if not fn.endswith(".md"):
                 raise InvalidMarkdownFileError(
                     f"File {fn} is not a markdown file")
@@ -79,7 +134,12 @@ async def main():
         langs=args.langs,
         max_threads=int(args.max_threads),
         max_line_length=int(args.max_line_length),
+        provider=args.provider,
+        source_language=args.source_language,
+        provider_options=args.provider_options,
     )
+    if str_to_bool(args.validate_provider):
+        await manager.validate_provider()
     await manager.update_localizations()
 
 

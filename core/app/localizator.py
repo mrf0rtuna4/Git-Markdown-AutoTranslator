@@ -1,24 +1,26 @@
-#  MIT License
-#
-#  Copyright (c) 2024-2026. Mr_Fortuna
-#
-#  Permission is hereby granted, free of charge, to any person obtaining a copy
-#  of this software and associated documentation files (the "Software"), to deal
-#  in the Software without restriction, including without limitation the rights
-#  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-#  copies of the Software, and to permit persons to whom the Software is
-#  furnished to do so, subject to the following conditions:
-#
-#  The above copyright notice and this permission notice shall be included in all
-#  copies or substantial portions of the Software.
-#
-#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-#  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-#  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-#  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-#  SOFTWARE.
+"""
+MIT License
+
+Copyright (c) 2024-2026 Mr_Fortuna
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+"""
 from __future__ import annotations
 
 import asyncio
@@ -26,8 +28,9 @@ import os
 import re
 from re import Pattern
 from concurrent.futures import ThreadPoolExecutor
+from typing import Sequence
 
-from deep_translator import GoogleTranslator
+from .providers import TranslationProviderFactory
 
 from .exceptions import FileWriteError, TranslationFailedError
 from .logger import Logger
@@ -37,14 +40,17 @@ from .processor import Processor
 class LocalizationManager:
     def __init__(
         self,
-        files: str,
-        langs: str,
+        files: str | Sequence[str],
+        langs: str | Sequence[str],
         max_threads: int = 5,
         max_line_length: int = 500,
         dist_dir: str = "dist",
+        provider: str = "GoogleTranslator",
+        source_language: str = "auto",
+        provider_options: str = "",
     ):
-        self.files: list[str] = ([file.strip() for file in files.split(",")])
-        self.langs: list[str] = [lang.strip() for lang in langs.split(",")]
+        self.files = self._split_csv(files)
+        self.langs = self._split_csv(langs)
         self.max_line_length = max_line_length
         self.max_threads = max_threads
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(max_threads)
@@ -52,14 +58,34 @@ class LocalizationManager:
             max_workers=max_threads)
         self.processor: Processor = Processor()
         self.dist_dir = dist_dir
+        self.provider = TranslationProviderFactory.canonical_name(provider)
+        self.source_language = source_language
+        self.provider_options = provider_options
         self._translation_cache: dict[tuple[str, str], str] = {}
         self.logger: Logger = Logger()
 
     @staticmethod
-    def _translate_sync(text: str, lang: str) -> str:
-        translator = GoogleTranslator(source="auto", target=lang)
+    def _split_csv(value: str | Sequence[str]) -> list[str]:
+        if isinstance(value, str):
+            return [item.strip() for item in value.split(",") if item.strip()]
+        return [item.strip() for item in value if item.strip()]
 
-        return translator.translate(text) # pyright: ignore[reportUnknownMemberType]
+    def _translate_sync(self, text: str, lang: str) -> str:
+        translator = TranslationProviderFactory.build(
+            provider=self.provider,
+            source=self.source_language,
+            target=lang,
+            provider_options=self.provider_options,
+        )
+
+        return translator.translate(text)
+    
+    async def validate_provider(self) -> None:
+        self.logger.log_info(
+            f"🔎 Validating {self.provider} provider with target {self.langs[0]}"
+        )
+        await self.translate_text("Hello", self.langs[0])
+        self.logger.log_info(f"✅ {self.provider} provider validation succeeded")
 
     async def _run_blocking_translation(self, text: str, lang: str) -> str:
         loop = asyncio.get_running_loop()

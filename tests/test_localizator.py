@@ -1,4 +1,3 @@
-from core.app.localizator import LocalizationManager
 import asyncio
 import sys
 import threading
@@ -9,6 +8,8 @@ from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from core.app.localizator import LocalizationManager
+from core.app.providers import ProviderSpec, TranslationProviderFactory
 
 class BlockingTranslator:
     calls = []
@@ -28,18 +29,27 @@ class BlockingTranslator:
 class LocalizationManagerTests(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         BlockingTranslator.calls = []
+        self.provider_patch = patch.dict(
+            TranslationProviderFactory._PROVIDERS,
+            {"blocking": ProviderSpec("Blocking", BlockingTranslator, {})},
+        )
+        self.provider_patch.start()
+
+    async def asyncTearDown(self):
+        self.provider_patch.stop()
 
     async def test_translate_text_runs_blocking_translator_in_executor(self):
-        manager = LocalizationManager(langs="es", files=[], max_threads=1)
+        manager = LocalizationManager(
+            langs="es", files=[], max_threads=1, provider="blocking"
+        )
         try:
-            with patch("core.app.localizator.GoogleTranslator", BlockingTranslator):
-                started_at = time.perf_counter()
-                task = asyncio.create_task(
-                    manager.translate_text("hello", "es"))
-                await asyncio.sleep(0)
-                self.assertLess(time.perf_counter() - started_at, 0.1)
+            started_at = time.perf_counter()
+            task = asyncio.create_task(
+                manager.translate_text("hello", "es"))
+            await asyncio.sleep(0)
+            self.assertLess(time.perf_counter() - started_at, 0.1)
 
-                self.assertEqual(await task, "es:hello")
+            self.assertEqual(await task, "es:hello")
         finally:
             manager.shutdown()
 
@@ -48,16 +58,17 @@ class LocalizationManagerTests(unittest.IsolatedAsyncioTestCase):
         self.assertNotEqual(thread_name, threading.current_thread().name)
 
     async def test_translate_markdown_unit_preserves_inline_placeholders(self):
-        manager = LocalizationManager(langs="ru", files=[], max_threads=1)
+        manager = LocalizationManager(
+            langs="ru", files=[], max_threads=1, provider="blocking"
+        )
         try:
             manager.processor.placeholder_map["_NON_TRANSLATE"] = [
                 ("_NON_TRANSLATE_token", "`FILES`")
             ]
 
-            with patch("core.app.localizator.GoogleTranslator", BlockingTranslator):
-                translated = await manager.translate_markdown_unit(
-                    "- _NON_TRANSLATE_token: A comma-separated list", "ru"
-                )
+            translated = await manager.translate_markdown_unit(
+                "- _NON_TRANSLATE_token: A comma-separated list", "ru"
+            )
         finally:
             manager.shutdown()
 
@@ -68,15 +79,16 @@ class LocalizationManagerTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(translated_segments, [": A comma-separated list"])
 
     async def test_translate_text_uses_cache(self):
-        manager = LocalizationManager(langs="es", files=[], max_threads=1)
+        manager = LocalizationManager(
+            langs="es", files=[], max_threads=1, provider="blocking"
+        )
         try:
-            with patch("core.app.localizator.GoogleTranslator", BlockingTranslator):
-                self.assertEqual(
-                    await manager.translate_text("hello", "es"), "es:hello"
-                )
-                self.assertEqual(
-                    await manager.translate_text("hello", "es"), "es:hello"
-                )
+            self.assertEqual(
+                await manager.translate_text("hello", "es"), "es:hello"
+            )
+            self.assertEqual(
+                await manager.translate_text("hello", "es"), "es:hello"
+            )
         finally:
             manager.shutdown()
 
