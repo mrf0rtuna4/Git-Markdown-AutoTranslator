@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v2  # Using an action to test the code
 
       - name: Run translation  # Step: start the translation
-        uses: mrf0rtuna4/Git-Markdown-AutoTranslator@v2.2.0  # Using an action to translate
+        uses: mrf0rtuna4/Git-Markdown-AutoTranslator@v2.3.0  # Using an action to translate
         with:
           FILES: 'README.md' # The *.md files to be translate
           LANGS: 'english,italian,dutch,spanish' # List of languages to be translated
@@ -136,7 +136,7 @@ Example with DeepL provider validation:
 
 ```yml
       - name: Run translation with DeepL
-        uses: mrf0rtuna4/Git-Markdown-AutoTranslator@v2.2.0
+        uses: mrf0rtuna4/Git-Markdown-AutoTranslator@v2.3.0
         with:
           FILES: 'README.md'
           LANGS: 'de,fr'
