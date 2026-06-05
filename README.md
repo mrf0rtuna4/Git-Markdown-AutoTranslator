@@ -150,19 +150,19 @@ Example with DeepL provider validation:
 
 And you can view, how to work action by clicking this widgets:
 <div align="center">
-  <a href="https://github.com/mrf0rtuna4/Git-Markdown-AutoTranslator/blob/translations/ru_README.md">
+  <a href="https://github.com/mrf0rtuna4/Git-Markdown-AutoTranslator/blob/translations_indev/ru_README.md">
       <img src="https://img.shields.io/badge/Язык-Руский-blue" alt="Руский" />
   </a>
-  <a href="https://github.com/mrf0rtuna4/Git-Markdown-AutoTranslator/blob/translations/ja_README.md">
+  <a href="https://github.com/mrf0rtuna4/Git-Markdown-AutoTranslator/blob/translations_indev/ja_README.md">
       <img src="https://img.shields.io/badge/言語-日本語-blue" alt="日本語" />
   </a>
-  <a href="https://github.com/mrf0rtuna4/Git-Markdown-AutoTranslator/blob/translations/it_README.md">
+  <a href="https://github.com/mrf0rtuna4/Git-Markdown-AutoTranslator/blob/translations_indev/it_README.md">
       <img src="https://img.shields.io/badge/Lingua-Italiano-blue" alt="Italiano" />
   </a>
-  <a href="https://github.com/mrf0rtuna4/Git-Markdown-AutoTranslator/blob/translations/uk_README.md">
+  <a href="https://github.com/mrf0rtuna4/Git-Markdown-AutoTranslator/blob/translations_indev/uk_README.md">
       <img src="https://img.shields.io/badge/Мова-Українська-blue" alt="Українська" />
   </a>
-  <a href="https://github.com/mrf0rtuna4/Git-Markdown-AutoTranslator/blob/translations/ar_README.md">
+  <a href="https://github.com/mrf0rtuna4/Git-Markdown-AutoTranslator/blob/translations_indev/ar_README.md">
       <img src="https://img.shields.io/badge/لغة-العربية-blue" alt="العربية" />
   </a>
 </div>
