@@ -3,9 +3,12 @@ from __future__ import annotations
 import asyncio
 import os
 import re
+import time
 from collections.abc import Sequence
 from concurrent.futures import ThreadPoolExecutor
 from re import Pattern
+
+from deep_translator.exceptions import TooManyRequests
 
 from .exceptions import FileWriteError, TranslationFailedError
 from .logger import Logger
@@ -24,11 +27,13 @@ class LocalizationManager:
         provider: str = "GoogleTranslator",
         source_language: str = "auto",
         provider_options: str = "",
+        max_retries: int = 5,
     ):
         self.files = self._split_csv(files)
         self.langs = self._split_csv(langs)
         self.max_line_length = max_line_length
         self.max_threads = max_threads
+        self.max_retries = max_retries
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(max_threads)
         self.translation_executor: ThreadPoolExecutor = ThreadPoolExecutor(max_workers=max_threads)
         self.processor: Processor = Processor()
@@ -53,12 +58,39 @@ class LocalizationManager:
             provider_options=self.provider_options,
         )
 
-        result = translator.translate(text)
+        last_exception: Exception | None = None
 
-        if result is None:
-            raise TranslationFailedError(f"Provider returned None for '{text[:100]}' -> '{lang}'")
+        for attempt in range(1, self.max_retries + 1):
+            try:
+                result = translator.translate(text)
 
-        return str(result)
+                if result is None:
+                    raise TranslationFailedError(
+                        f"Provider returned None for '{text[:100]}' -> '{lang}'"
+                    )
+
+                return str(result)
+
+            except TooManyRequests as e:
+                last_exception = e
+                if attempt == self.max_retries:
+                    self.logger.log_error(
+                        f"Rate limited by provider for '{lang}' after {self.max_retries} attempts"
+                    )
+                    raise TranslationFailedError(f"Translation failed for '{lang}'") from e
+
+                delay = 1.0 * (2 ** (attempt - 1))
+                self.logger.log_warn(
+                    f"Rate limited by provider for '{lang}', retrying in {delay:.1f}s "
+                    f"(attempt {attempt}/{self.max_retries})"
+                )
+                time.sleep(delay)
+
+            except Exception as e:
+                last_exception = e
+                raise TranslationFailedError(f"Translation failed for '{lang}'") from e
+
+        raise TranslationFailedError(f"Translation failed for '{lang}'") from last_exception
 
     async def validate_provider(self) -> None:
         self.logger.log_info(f"🔎 Validating {self.provider} provider with target {self.langs[0]}")
@@ -117,6 +149,8 @@ class LocalizationManager:
                 self._translation_cache[cache_key] = translated
                 return translated
 
+            except TranslationFailedError:
+                raise
             except Exception as e:
                 self.logger.log_error(f"Translation failed for {lang}: {e!s}")
                 raise TranslationFailedError(f"Translation failed for '{lang}'") from e
