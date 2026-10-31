@@ -20,7 +20,7 @@ jobs:
       - name: Run translation
         uses: mrf0rtuna4/Git-Markdown-AutoTranslator@master
         with:
-          LANGS: 'ru, ar, uk, it, ja'
+          LANGS: 'ru, it, ja'
           FILES: 'README.md'
           DEBUG: 'True'
 
