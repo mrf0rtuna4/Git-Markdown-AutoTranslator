@@ -1,5 +1,5 @@
-import unittest
 import sys
+import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -10,9 +10,7 @@ from src.main import _parse_arguments
 
 class MainArgumentParsingTests(unittest.TestCase):
     def test_parse_arguments_keeps_backwards_compatible_defaults(self):
-        config = _parse_arguments(
-            ["main.py", "README.md", "es", "false", "5", "500"]
-        )
+        config = _parse_arguments(["main.py", "README.md", "es", "false", "5", "500"])
 
         self.assertEqual(config.provider, "GoogleTranslator")
         self.assertEqual(config.source_language, "auto")
@@ -42,9 +40,7 @@ class MainArgumentParsingTests(unittest.TestCase):
 
     def test_parse_arguments_rejects_unknown_provider(self):
         with self.assertRaises(InvalidArgumentsError):
-            _parse_arguments(
-                ["main.py", "README.md", "es", "false", "5", "500", "unknown"]
-            )
+            _parse_arguments(["main.py", "README.md", "es", "false", "5", "500", "unknown"])
 
 
 if __name__ == "__main__":

@@ -1,16 +1,16 @@
-""" App methods and classes """
+"""App methods and classes"""
 
+from .config import LocalizationConfig, MarkdownRange
 from .localizator import LocalizationManager
 from .logger import Logger
 from .processor import Processor
-from .config import LocalizationConfig, MarkdownRange
 from .providers import TranslationProviderFactory
 
 __all__ = [
+    "LocalizationConfig",
     "LocalizationManager",
     "Logger",
-    "Processor",
-    "LocalizationConfig",
     "MarkdownRange",
-    "TranslationProviderFactory"
+    "Processor",
+    "TranslationProviderFactory",
 ]

@@ -1,13 +1,13 @@
 import asyncio
 import sys
+from collections.abc import Sequence
 from pathlib import Path
-from typing import Sequence
 
 # DO NOT MOVE, THIS MAY STAY BEFORE src.* IMPORTS
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from src.app import LocalizationConfig, LocalizationManager, Logger, TranslationProviderFactory
 from src.app.exceptions import InvalidArgumentsError, InvalidMarkdownFileError
-from src.app import LocalizationManager, LocalizationConfig, Logger, TranslationProviderFactory
 
 
 def _parse_arguments(argv: Sequence[str]) -> LocalizationConfig:
@@ -36,29 +36,13 @@ def _parse_arguments(argv: Sequence[str]) -> LocalizationConfig:
             "[validate_provider]"
         )
 
-    provider: str = (
-        optional_args[0]
-        if len(optional_args) >= 1
-        else "GoogleTranslator"
-    )
+    provider: str = optional_args[0] if len(optional_args) >= 1 else "GoogleTranslator"
 
-    source_language: str = (
-        optional_args[1]
-        if len(optional_args) >= 2
-        else "auto"
-    )
+    source_language: str = optional_args[1] if len(optional_args) >= 2 else "auto"
 
-    provider_options: str = (
-        optional_args[2]
-        if len(optional_args) >= 3
-        else ""
-    )
+    provider_options: str = optional_args[2] if len(optional_args) >= 3 else ""
 
-    validate_provider: str = (
-        optional_args[3]
-        if len(optional_args) >= 4
-        else "false"
-    )
+    validate_provider: str = optional_args[3] if len(optional_args) >= 4 else "false"
 
     try:
         TranslationProviderFactory.canonical_name(provider)
@@ -100,8 +84,7 @@ async def main():
     try:
         for fn in (f.strip() for f in args.files.split(",")):
             if Path(fn).suffix.lower() != ".md":
-                raise InvalidMarkdownFileError(
-                    f"File {fn} is not a markdown file")
+                raise InvalidMarkdownFileError(f"File {fn} is not a markdown file")
     except InvalidMarkdownFileError as exc:
         logger.log_error(f"❌ {exc}")
         sys.exit(1)

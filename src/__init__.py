@@ -1,1 +1,1 @@
-""" Automatic translation of your *.md files, simply fast and convenient """
+"""Automatic translation of your *.md files, simply fast and convenient"""

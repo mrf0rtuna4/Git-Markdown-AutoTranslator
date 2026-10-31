@@ -3,15 +3,14 @@ from __future__ import annotations
 import asyncio
 import os
 import re
-from re import Pattern
+from collections.abc import Sequence
 from concurrent.futures import ThreadPoolExecutor
-from typing import Sequence
-
-from .providers import TranslationProviderFactory
+from re import Pattern
 
 from .exceptions import FileWriteError, TranslationFailedError
 from .logger import Logger
 from .processor import Processor
+from .providers import TranslationProviderFactory
 
 
 class LocalizationManager:
@@ -31,8 +30,7 @@ class LocalizationManager:
         self.max_line_length = max_line_length
         self.max_threads = max_threads
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(max_threads)
-        self.translation_executor: ThreadPoolExecutor = ThreadPoolExecutor(
-            max_workers=max_threads)
+        self.translation_executor: ThreadPoolExecutor = ThreadPoolExecutor(max_workers=max_threads)
         self.processor: Processor = Processor()
         self.dist_dir = dist_dir
         self.provider = TranslationProviderFactory.canonical_name(provider)
@@ -58,16 +56,12 @@ class LocalizationManager:
         result = translator.translate(text)
 
         if result is None:
-            raise TranslationFailedError(
-                f"Provider returned None for '{text[:100]}' -> '{lang}'"
-            )
+            raise TranslationFailedError(f"Provider returned None for '{text[:100]}' -> '{lang}'")
 
         return str(result)
-    
+
     async def validate_provider(self) -> None:
-        self.logger.log_info(
-            f"🔎 Validating {self.provider} provider with target {self.langs[0]}"
-        )
+        self.logger.log_info(f"🔎 Validating {self.provider} provider with target {self.langs[0]}")
         await self.translate_text("Hello", self.langs[0])
         self.logger.log_info(f"✅ {self.provider} provider validation succeeded")
 
@@ -116,9 +110,7 @@ class LocalizationManager:
                 translated = await self._run_blocking_translation(text, lang)
 
                 if translated is None:
-                    raise TranslationFailedError(
-                        f"Empty translation result for '{text[:100]}'"
-                    )
+                    raise TranslationFailedError(f"Empty translation result for '{text[:100]}'")
 
                 translated = str(translated)
 
@@ -126,12 +118,8 @@ class LocalizationManager:
                 return translated
 
             except Exception as e:
-                self.logger.log_error(
-                    f"Translation failed for {lang}: {str(e)}"
-                )
-                raise TranslationFailedError(
-                    f"Translation failed for '{lang}'"
-                ) from e
+                self.logger.log_error(f"Translation failed for {lang}: {e!s}")
+                raise TranslationFailedError(f"Translation failed for '{lang}'") from e
 
     async def process_file(self, file_path: str) -> None:
         with open(file_path, "r", encoding="utf-8") as file:
@@ -150,8 +138,7 @@ class LocalizationManager:
 
             placeholder_pattern = self._placeholder_pattern()
             is_placeholder_only = bool(
-                placeholder_pattern and placeholder_pattern.fullmatch(
-                    line.strip())
+                placeholder_pattern and placeholder_pattern.fullmatch(line.strip())
             )
 
             if is_placeholder_only:
@@ -159,15 +146,11 @@ class LocalizationManager:
                     translations[lang].append(line)
                 continue
 
-            translation_tasks = [
-                self.translate_markdown_unit(line, lang) for lang in self.langs
-            ]
+            translation_tasks = [self.translate_markdown_unit(line, lang) for lang in self.langs]
             translated_lines = await asyncio.gather(*translation_tasks)
             for lang, translated_line in zip(self.langs, translated_lines):
                 if translated_line is None:
-                    self.logger.log_error(
-                        f"NULL translation: lang={lang}, line={line!r}"
-                    )
+                    self.logger.log_error(f"NULL translation: lang={lang}, line={line!r}")
                     continue
                 translations[lang].append(translated_line)
 
@@ -193,11 +176,8 @@ class LocalizationManager:
                 file.write(content)
             self.logger.log_info(f"⌛ File saved: {file_path}")
         except Exception as e:
-            self.logger.log_error(
-                f"💥 Failed to write file for {lang} ({file_path}): {str(e)}")
-            raise FileWriteError(
-                f"Failed to write translation file: {file_path}"
-            ) from e
+            self.logger.log_error(f"💥 Failed to write file for {lang} ({file_path}): {e!s}")
+            raise FileWriteError(f"Failed to write translation file: {file_path}") from e
 
     def shutdown(self) -> None:
         self.translation_executor.shutdown(wait=True)

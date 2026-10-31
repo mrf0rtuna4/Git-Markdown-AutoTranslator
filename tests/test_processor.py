@@ -1,5 +1,5 @@
-import unittest
 import sys
+import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
@@ -9,7 +9,9 @@ from src.app.processor import Processor
 
 class ProcessorAstTests(unittest.TestCase):
     def test_preserves_fenced_code_as_single_placeholder(self):
-        content = "# Title\n\n```python\nfor line in lines:\n    print(line)\n```\n\nParagraph text."
+        content = (
+            "# Title\n\n```python\nfor line in lines:\n    print(line)\n```\n\nParagraph text."
+        )
         processor = Processor()
 
         units, placeholder_map = processor.decompile_file(content, file="README.md")
@@ -19,9 +21,7 @@ class ProcessorAstTests(unittest.TestCase):
         self.assertEqual(len(placeholder_map["_MD_PROTECTED"]), 1)
         placeholder, original = placeholder_map["_MD_PROTECTED"][0]
         self.assertIn(placeholder, units)
-        self.assertEqual(
-            original, "```python\nfor line in lines:\n    print(line)\n```"
-        )
+        self.assertEqual(original, "```python\nfor line in lines:\n    print(line)\n```")
 
         rebuilt = processor.build_file(units, placeholder_map, "es", file="README.md")
         self.assertEqual(rebuilt, content)
@@ -77,8 +77,7 @@ class ProcessorAstTests(unittest.TestCase):
         notes = [original for _, original in placeholder_map["_MD_BLOCK_NOTE"]]
         self.assertEqual(notes, ["> [!WARNING]"])
         self.assertIn(
-            "> We only use TRANSLATION DeepL\n"
-            "> This may affect the quality of the translation.",
+            "> We only use TRANSLATION DeepL\n> This may affect the quality of the translation.",
             units,
         )
         self.assertEqual(processor.build_file(units, placeholder_map, "ru"), content)
@@ -89,9 +88,7 @@ class ProcessorAstTests(unittest.TestCase):
 
         units, placeholder_map = processor.decompile_file(content, file="README.md")
 
-        protected_inline = [
-            original for _, original in placeholder_map["_NON_TRANSLATE"]
-        ]
+        protected_inline = [original for _, original in placeholder_map["_NON_TRANSLATE"]]
         self.assertEqual(protected_inline, ["`FILES`"])
         self.assertNotIn("`FILES`", units[0])
         self.assertEqual(processor.build_file(units, placeholder_map, "ru"), content)
@@ -100,9 +97,7 @@ class ProcessorAstTests(unittest.TestCase):
         content = Path("tests/fixtures/github_markdown.md").read_text(encoding="utf-8")
         processor = Processor()
 
-        units, placeholder_map = processor.decompile_file(
-            content, file="github_markdown.md"
-        )
+        units, placeholder_map = processor.decompile_file(content, file="github_markdown.md")
 
         notes = [original for _, original in placeholder_map["_MD_BLOCK_NOTE"]]
         inline = [original for _, original in placeholder_map["_NON_TRANSLATE"]]

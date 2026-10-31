@@ -13,6 +13,7 @@ class LocalizationConfig:
     provider_options: str = ""
     validate_provider: str = "false"
 
+
 @dataclass(frozen=True)
 class MarkdownRange:
     start: int

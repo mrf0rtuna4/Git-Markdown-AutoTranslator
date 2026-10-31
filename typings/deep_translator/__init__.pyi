@@ -21,4 +21,19 @@ __copyright__ = ...
 __author__ = ...
 __email__ = ...
 __version__ = ...
-__all__ = ["GoogleTranslator", "PonsTranslator", "LingueeTranslator", "MyMemoryTranslator", "YandexTranslator", "MicrosoftTranslator", "QcriTranslator", "DeeplTranslator", "LibreTranslator", "PapagoTranslator", "ChatGptTranslator", "BaiduTranslator", "single_detection", "batch_detection"]
+__all__ = [
+    "BaiduTranslator",
+    "ChatGptTranslator",
+    "DeeplTranslator",
+    "GoogleTranslator",
+    "LibreTranslator",
+    "LingueeTranslator",
+    "MicrosoftTranslator",
+    "MyMemoryTranslator",
+    "PapagoTranslator",
+    "PonsTranslator",
+    "QcriTranslator",
+    "YandexTranslator",
+    "batch_detection",
+    "single_detection",
+]

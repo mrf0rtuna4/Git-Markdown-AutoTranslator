@@ -19,4 +19,3 @@ class FileSystem:
             content,
             encoding="utf-8",
         )
-        

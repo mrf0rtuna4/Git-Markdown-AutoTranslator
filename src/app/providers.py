@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import json
 import os
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Any, ClassVar, Mapping, Protocol, TypeAlias
+from typing import Any, ClassVar, Protocol, TypeAlias
 
 from deep_translator import (
     BaiduTranslator,
@@ -27,8 +28,8 @@ class Translator(Protocol):
         text: str,
         *args: Any,
         **kwargs: Any,
-    ) -> str | None:
-        ...
+    ) -> str | None: ...
+
 
 TranslatorClass: TypeAlias = type[Any]
 
@@ -54,9 +55,7 @@ class TranslationProviderFactory:
         "yandextranslator": ProviderSpec(
             "YandexTranslator", YandexTranslator, {"api_key": "YANDEX_API_KEY"}
         ),
-        "yandex": ProviderSpec(
-            "YandexTranslator", YandexTranslator, {"api_key": "YANDEX_API_KEY"}
-        ),
+        "yandex": ProviderSpec("YandexTranslator", YandexTranslator, {"api_key": "YANDEX_API_KEY"}),
         "microsofttranslator": ProviderSpec(
             "MicrosoftTranslator",
             MicrosoftTranslator,
@@ -70,9 +69,7 @@ class TranslationProviderFactory:
         "qcritranslator": ProviderSpec(
             "QcriTranslator", QcriTranslator, {"api_key": "QCRI_API_KEY"}
         ),
-        "qcri": ProviderSpec(
-            "QcriTranslator", QcriTranslator, {"api_key": "QCRI_API_KEY"}
-        ),
+        "qcri": ProviderSpec("QcriTranslator", QcriTranslator, {"api_key": "QCRI_API_KEY"}),
         "deepltranslator": ProviderSpec(
             "DeeplTranslator",
             DeeplTranslator,
@@ -139,9 +136,7 @@ class TranslationProviderFactory:
 
     @classmethod
     def available_providers(cls) -> tuple[str, ...]:
-        return tuple(
-            dict.fromkeys(spec.name for spec in cls._PROVIDERS.values()).keys()
-        )
+        return tuple(dict.fromkeys(spec.name for spec in cls._PROVIDERS.values()).keys())
 
     @classmethod
     def canonical_name(cls, provider: str) -> str:

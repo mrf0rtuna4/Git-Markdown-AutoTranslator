@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import re
 import uuid
-from typing import TypeAlias, Final
 from collections.abc import Iterable, Sequence
+from typing import Final, TypeAlias
+
 from markdown_it import MarkdownIt
 
-from .logger import Logger
 from .config import MarkdownRange
+from .logger import Logger
 
 EXCLUDED_ADMONITIONS: Final[tuple[str, ...]] = ("IMPORTANT", "CAUTION", "TIP", "WARNING")
 PROTECTED_PLACEHOLDER: Final[str] = "_MD_PROTECTED"
@@ -16,10 +17,7 @@ TokenMap: TypeAlias = tuple[int, int]
 
 Placeholder: TypeAlias = tuple[str, str]
 
-PlaceholderMap: TypeAlias = dict[
-    str,
-    list[Placeholder]
-]
+PlaceholderMap: TypeAlias = dict[str, list[Placeholder]]
 
 
 class Processor:
@@ -43,8 +41,7 @@ class Processor:
         try:
             from markdown_it import MarkdownIt
         except ImportError:
-            self.logger.log_dbg(
-                "markdown-it-py is unavailable; using conservative fallback parser")
+            self.logger.log_dbg("markdown-it-py is unavailable; using conservative fallback parser")
             return None
 
         parser = MarkdownIt("commonmark", {"html": True})
@@ -52,8 +49,7 @@ class Processor:
             try:
                 parser.enable(rule)
             except ValueError:
-                self.logger.log_dbg(
-                    f"markdown-it-py rule is unavailable: {rule}")
+                self.logger.log_dbg(f"markdown-it-py rule is unavailable: {rule}")
         return parser
 
     @staticmethod
@@ -65,10 +61,8 @@ class Processor:
 
     def _store_placeholder(self, key: str, original: str, placeholder_map: PlaceholderMap) -> str:
         unique_placeholder = self._generate_placeholder(key)
-        placeholder_map.setdefault(key, []).append(
-            (unique_placeholder, original))
-        self.logger.log_dbg(
-            f"Created placeholder: {unique_placeholder} for tag: {key}")
+        placeholder_map.setdefault(key, []).append((unique_placeholder, original))
+        self.logger.log_dbg(f"Created placeholder: {unique_placeholder} for tag: {key}")
         return unique_placeholder
 
     @staticmethod
@@ -140,9 +134,7 @@ class Processor:
                 marker = stripped[:3]
                 start = index
                 index += 1
-                while index < len(lines) and not lines[index].strip().startswith(
-                    marker
-                ):
+                while index < len(lines) and not lines[index].strip().startswith(marker):
                     index += 1
                 index = min(index + 1, len(lines))
                 protected.append(MarkdownRange(start, index, "fence"))
@@ -220,44 +212,26 @@ class Processor:
         for token in tokens:
             token_map = token.map
             if token.type in {"fence", "code_block", "html_block"} and token_map:
-                protected.append(MarkdownRange(
-                    token_map[0], token_map[1], token.type))
+                protected.append(MarkdownRange(token_map[0], token_map[1], token.type))
 
             if token.type == "hr" and token_map:
-                protected.append(
-                    MarkdownRange(token_map[0], token_map[1], "hr")
-                )
+                protected.append(MarkdownRange(token_map[0], token_map[1], "hr"))
 
             if token.type == "table_open" and token_map:
-                protected.append(MarkdownRange(
-                    token_map[0], token_map[1], "table"))
+                protected.append(MarkdownRange(token_map[0], token_map[1], "table"))
 
             if token.type == "blockquote_open" and token_map:
-                blockquote_stack.append(
-                    (token_map[0], token_map[1])
-                )
+                blockquote_stack.append((token_map[0], token_map[1]))
             elif token.type == "blockquote_close" and blockquote_stack:
                 blockquote_map = blockquote_stack.pop()
-                first_line = (
-                    lines[blockquote_map[0]] if blockquote_map[0] < len(
-                        lines) else ""
-                )
+                first_line = lines[blockquote_map[0]] if blockquote_map[0] < len(lines) else ""
                 if self._admonition_type(first_line) in EXCLUDED_ADMONITIONS:
                     protected.append(
-                        MarkdownRange(
-                            blockquote_map[0], blockquote_map[0] +
-                            1, "admonition"
-                        )
+                        MarkdownRange(blockquote_map[0], blockquote_map[0] + 1, "admonition")
                     )
 
-            if (
-                token.type in {"paragraph_open",
-                               "heading_open", "list_item_open"}
-                and token_map
-            ):
-                translatable.append(
-                    MarkdownRange(token_map[0], token_map[1], token.type)
-                )
+            if token.type in {"paragraph_open", "heading_open", "list_item_open"} and token_map:
+                translatable.append(MarkdownRange(token_map[0], token_map[1], token.type))
 
         for index, line in enumerate(lines):
             if self._line_starts_mdx_statement(line):
@@ -320,9 +294,7 @@ class Processor:
         )
         return re.sub(
             r"(?<=\]\()([^\s)]+)",
-            lambda match: self._store_placeholder(
-                "_L1NK", match.group(0), placeholder_map
-            ),
+            lambda match: self._store_placeholder("_L1NK", match.group(0), placeholder_map),
             protected,
         )
 
@@ -347,14 +319,14 @@ class Processor:
             parts.append("\n".join(current))
         return parts
 
-    def _decompile_with_ast(self, content: str, placeholder_map: PlaceholderMap, max_line_length: int):
+    def _decompile_with_ast(
+        self, content: str, placeholder_map: PlaceholderMap, max_line_length: int
+    ):
         lines = content.splitlines()
-        protected_ranges, translatable_ranges = self._markdown_it_ranges(
-            content, lines)
+        protected_ranges, translatable_ranges = self._markdown_it_ranges(content, lines)
         protected_ranges = self._merge_ranges(protected_ranges)
         translatable_ranges = self._merge_ranges(
-            self._subtract_protected_ranges(
-                translatable_ranges, protected_ranges)
+            self._subtract_protected_ranges(translatable_ranges, protected_ranges)
         )
 
         output: list[str] = []
@@ -362,33 +334,22 @@ class Processor:
         while index < len(lines):
             protected = self._range_starts(protected_ranges, index)
             if protected:
-                original = "\n".join(lines[protected.start: protected.end])
-                key = (
-                    "_MD_BLOCK_NOTE"
-                    if "admonition" in protected.kind
-                    else PROTECTED_PLACEHOLDER
-                )
-                output.append(self._store_placeholder(
-                    key, original, placeholder_map))
+                original = "\n".join(lines[protected.start : protected.end])
+                key = "_MD_BLOCK_NOTE" if "admonition" in protected.kind else PROTECTED_PLACEHOLDER
+                output.append(self._store_placeholder(key, original, placeholder_map))
                 index = protected.end
                 continue
             translatable = self._range_starts(translatable_ranges, index)
             if translatable:
-                original = "\n".join(
-                    lines[translatable.start: translatable.end])
-                protected_original = self._protect_inline_markdown(
-                    original, placeholder_map
-                )
-                output.extend(
-                    self._split_translation_unit(
-                        protected_original, max_line_length)
-                )
+                original = "\n".join(lines[translatable.start : translatable.end])
+                protected_original = self._protect_inline_markdown(original, placeholder_map)
+                output.extend(self._split_translation_unit(protected_original, max_line_length))
                 index = translatable.end
                 continue
 
-            if self._is_within_ranges(
-                protected_ranges, index
-            ) or self._is_within_ranges(translatable_ranges, index):
+            if self._is_within_ranges(protected_ranges, index) or self._is_within_ranges(
+                translatable_ranges, index
+            ):
                 index += 1
                 continue
 
@@ -404,12 +365,12 @@ class Processor:
                 text = text.replace(ph, original)
         return text
 
-    def decompile_file(self, content: str, *, file: str = 'None', max_line_length: int = 500) -> tuple[list[str], PlaceholderMap]:
+    def decompile_file(
+        self, content: str, *, file: str = "None", max_line_length: int = 500
+    ) -> tuple[list[str], PlaceholderMap]:
         self.clear_placeholder_map()
-        lines = self._decompile_with_ast(
-            content, self.placeholder_map, max_line_length)
-        self.logger.log_info(
-            f"💠 Decompiled {file} into {len(lines)} AST translation units.")
+        lines = self._decompile_with_ast(content, self.placeholder_map, max_line_length)
+        self.logger.log_info(f"💠 Decompiled {file} into {len(lines)} AST translation units.")
         return lines, self.placeholder_map
 
     def build_file(
@@ -421,10 +382,7 @@ class Processor:
         file: str = "None",
     ) -> str:
 
-        content = "\n".join(
-            line if line is not None else ""
-            for line in translated_lines
-        )
+        content = "\n".join(line if line is not None else "" for line in translated_lines)
 
         self.logger.log_info(f"📦 Rebuilding {lang}_{file}")
 
@@ -432,7 +390,7 @@ class Processor:
         text = re.sub(r"(\*\*|__)[ \t]*(.*?)[ \t]*(\1)", r"\1\2\1", text)
 
         return text
-    
+
     def post_check_placeholders(self, translated_content: str):
         rem = [
             ph
