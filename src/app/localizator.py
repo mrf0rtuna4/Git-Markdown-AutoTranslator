@@ -28,12 +28,16 @@ class LocalizationManager:
         source_language: str = "auto",
         provider_options: str = "",
         max_retries: int = 5,
+        delay_between_requests: float = 1.0,
+        batch_size: int = 10,
     ):
         self.files = self._split_csv(files)
         self.langs = self._split_csv(langs)
         self.max_line_length = max_line_length
         self.max_threads = max_threads
         self.max_retries = max_retries
+        self.delay_between_requests = delay_between_requests
+        self.batch_size = batch_size
         self.semaphore: asyncio.Semaphore = asyncio.Semaphore(max_threads)
         self.translation_executor: ThreadPoolExecutor = ThreadPoolExecutor(max_workers=max_threads)
         self.processor: Processor = Processor()
@@ -79,7 +83,7 @@ class LocalizationManager:
                     )
                     raise TranslationFailedError(f"Translation failed for '{lang}'") from e
 
-                delay = 1.0 * (2 ** (attempt - 1))
+                delay = 2.0 * (2 ** (attempt - 1))
                 self.logger.log_warn(
                     f"Rate limited by provider for '{lang}', retrying in {delay:.1f}s "
                     f"(attempt {attempt}/{self.max_retries})"
@@ -91,6 +95,52 @@ class LocalizationManager:
                 raise TranslationFailedError(f"Translation failed for '{lang}'") from e
 
         raise TranslationFailedError(f"Translation failed for '{lang}'") from last_exception
+
+    def _translate_batch_sync(self, texts: list[str], lang: str) -> list[str]:
+        translator = TranslationProviderFactory.build(
+            provider=self.provider,
+            source=self.source_language,
+            target=lang,
+            provider_options=self.provider_options,
+        )
+
+        last_exception: Exception | None = None
+
+        for attempt in range(1, self.max_retries + 1):
+            try:
+                if hasattr(translator, "translate_batch"):
+                    raw_results = translator.translate_batch(texts)
+                else:
+                    raw_results = [translator.translate(t) for t in texts]
+
+                return [str(r) if r is not None else "" for r in raw_results]
+
+            except TooManyRequests as e:
+                last_exception = e
+                if attempt == self.max_retries:
+                    self.logger.log_error(
+                        f"Rate limited by provider for '{lang}' batch after {self.max_retries} attempts"
+                    )
+                    raise TranslationFailedError(f"Translation failed for '{lang}'") from e
+
+                delay = 2.0 * (2 ** (attempt - 1))
+                self.logger.log_warn(
+                    f"Rate limited by provider for '{lang}' batch, retrying in {delay:.1f}s "
+                    f"(attempt {attempt}/{self.max_retries})"
+                )
+                time.sleep(delay)
+
+            except Exception as e:
+                last_exception = e
+                raise TranslationFailedError(f"Translation failed for '{lang}'") from e
+
+        raise TranslationFailedError(f"Translation failed for '{lang}'") from last_exception
+
+    async def _run_blocking_batch_translation(self, texts: list[str], lang: str) -> list[str]:
+        loop = asyncio.get_running_loop()
+        return await loop.run_in_executor(
+            self.translation_executor, self._translate_batch_sync, texts, lang
+        )
 
     async def validate_provider(self) -> None:
         self.logger.log_info(f"🔎 Validating {self.provider} provider with target {self.langs[0]}")
@@ -180,13 +230,15 @@ class LocalizationManager:
                     translations[lang].append(line)
                 continue
 
-            translation_tasks = [self.translate_markdown_unit(line, lang) for lang in self.langs]
-            translated_lines = await asyncio.gather(*translation_tasks)
-            for lang, translated_line in zip(self.langs, translated_lines):
+            for lang in self.langs:
+                translated_line = await self.translate_markdown_unit(line, lang)
                 if translated_line is None:
                     self.logger.log_error(f"NULL translation: lang={lang}, line={line!r}")
-                    continue
+                    translated_line = line
                 translations[lang].append(translated_line)
+
+                if lang != self.langs[-1]:
+                    await asyncio.sleep(self.delay_between_requests)
 
         for lang, translated_lines in translations.items():
             translated_content = self.processor.build_file(
